@@ -75,6 +75,32 @@ click **Add New → Project → Import** your repo. Every `git push` auto-deploy
 
 3. Share the link on WhatsApp 🎉
 
+## Group invitation links
+
+Share these instead of the plain URL to tag each RSVP with who invited them
+(tracked in the `Group` column of the RSVP tab):
+
+| Link | Group |
+|---|---|
+| `/gi` | Nuqman (Groom) |
+| `/br` | Alya (Bride) |
+| `/zj` | Zainal 'Abidin (Father) |
+| `/mm` | Morly (Mother) |
+| `/sb` | Siblings |
+
+Edit the `groups` map in `js/config.js` (and matching rewrites in
+`vercel.json`) to add or rename groups.
+
+## Dashboard
+
+`/dashboard-kambing` shows live RSVP stats: attending pax, per-group chart,
+and the full response table. It is unlisted — only people who know the URL
+can find it. To change the secret path, rename `dashboard-kambing.html`.
+
+> After changing `apps-script/Code.gs`, re-deploy it: in the Apps Script
+> editor, **Deploy → Manage deployments → ✏ Edit → Version: New version →
+> Deploy** (the URL stays the same).
+
 ## Tips
 
 - **Test the flow** end-to-end once: submit an RSVP and a wish from your phone

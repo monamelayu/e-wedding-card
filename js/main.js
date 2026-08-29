@@ -3,6 +3,12 @@
 
 const C = WEDDING_CONFIG;
 
+// Invitation group from the URL path (/gi, /br, ...), "" if none
+const GROUP = (() => {
+  const seg = (location.pathname.split("/").filter(Boolean)[0] || "").toLowerCase();
+  return C.groups && C.groups[seg] ? seg : "";
+})();
+
 // ---------------- i18n ----------------
 const I18N = {
   bm: {
@@ -263,6 +269,7 @@ rsvpForm.addEventListener("submit", async (e) => {
       name: fd.get("name").trim(),
       attending,
       pax: attending === "yes" ? Number(fd.get("pax")) : 0,
+      group: GROUP,
     });
     status.className = "form-status ok";
     status.textContent = t("rsvpOk") + (DEMO ? " " + t("demoNote") : "");

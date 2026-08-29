@@ -1,14 +1,15 @@
 /**
  * Google Apps Script backend for the wedding card.
  *
- * Paste this into Extensions > Apps Script inside your Google Sheet,
- * then Deploy > New deployment > Web app
+ * Paste this into Extensions > Apps Script inside your Google Sheet.
+ * First time: Deploy > New deployment > Web app
  *   - Execute as: Me
  *   - Who has access: Anyone
- * Copy the Web App URL into js/config.js (appsScriptUrl).
+ * Updating existing deployment: Deploy > Manage deployments > (pencil) Edit
+ *   > Version: New version > Deploy  (keeps the same URL).
  *
- * Creates two tabs automatically on first submission:
- *   RSVP:   Timestamp | Name | Attending | Pax
+ * Tabs (created/updated automatically):
+ *   RSVP:   Timestamp | Name | Attending | Pax | Group
  *   Wishes: Timestamp | Name | Message
  */
 
@@ -20,8 +21,10 @@ function getSheet(name, headers) {
   let sheet = ss.getSheetByName(name);
   if (!sheet) {
     sheet = ss.insertSheet(name);
-    sheet.appendRow(headers);
-    sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+  }
+  // Keep the header row in sync (adds new columns like "Group" to old tabs)
+  if (sheet.getLastColumn() < headers.length) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
   }
   return sheet;
 }
@@ -32,7 +35,8 @@ function json(obj) {
   );
 }
 
-// GET  ?type=wishes  -> list of wishes (newest first, max 100)
+// GET ?type=wishes -> wishes (newest first, max 100)
+// GET ?type=rsvps  -> all RSVP rows (for the dashboard)
 function doGet(e) {
   if (e.parameter.type === "wishes") {
     const sheet = getSheet(WISHES_SHEET, ["Timestamp", "Name", "Message"]);
@@ -45,6 +49,24 @@ function doGet(e) {
       .slice(0, 100);
     return json({ ok: true, wishes: wishes });
   }
+
+  if (e.parameter.type === "rsvps") {
+    const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group"]);
+    const rows = sheet.getDataRange().getValues().slice(1);
+    const rsvps = rows
+      .map(function (r) {
+        return {
+          timestamp: r[0],
+          name: String(r[1]),
+          attending: String(r[2]),
+          pax: Number(r[3]) || 0,
+          group: String(r[4] || ""),
+        };
+      })
+      .reverse();
+    return json({ ok: true, rsvps: rsvps });
+  }
+
   return json({ ok: true, message: "Wedding card API is running" });
 }
 
@@ -56,12 +78,13 @@ function doPost(e) {
     if (!name) return json({ ok: false, error: "Name is required" });
 
     if (data.type === "rsvp") {
-      const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax"]);
+      const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group"]);
       sheet.appendRow([
         new Date(),
         name,
         data.attending === "yes" ? "Yes" : "No",
         Number(data.pax) || 0,
+        String(data.group || "").slice(0, 20),
       ]);
       return json({ ok: true });
     }

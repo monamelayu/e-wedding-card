@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RSVP Dashboard · Nuqman &amp; Alya</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    :root {
+      --surface-1: #fcfcfb;
+      --page: #f9f9f7;
+      --text-primary: #0b0b0b;
+      --text-secondary: #52514e;
+      --muted: #898781;
+      --grid: #e1e0d9;
+      --baseline: #c3c2b7;
+      --border: rgba(11, 11, 11, 0.10);
+      --series-1: #2a78d6;   /* attending */
+      --decline: #898781;    /* declined = neutral, de-emphasised */
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --surface-1: #1a1a19;
+        --page: #0d0d0d;
+        --text-primary: #ffffff;
+        --text-secondary: #c3c2b7;
+        --muted: #898781;
+        --grid: #2c2c2a;
+        --baseline: #383835;
+        --border: rgba(255, 255, 255, 0.10);
+        --series-1: #3987e5;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--page);
+      color: var(--text-primary);
+      padding: 24px 16px 60px;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    h1 { font-size: 1.25rem; font-weight: 600; }
+    h1 small { display: block; font-size: 0.8rem; font-weight: 400; color: var(--text-secondary); }
+    .refresh-row { display: flex; align-items: center; gap: 10px; }
+    #last-updated { font-size: 0.75rem; color: var(--muted); }
+    button.refresh {
+      font: inherit; font-size: 0.8rem; padding: 6px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); cursor: pointer;
+    }
+    button.refresh:hover { border-color: var(--baseline); }
+
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .tile {
+      background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    }
+    .tile .label { font-size: 0.75rem; color: var(--text-secondary); }
+    .tile .value { font-size: 1.7rem; font-weight: 600; line-height: 1.2; }
+    .tile .sub { font-size: 0.72rem; color: var(--muted); }
+
+    .card {
+      background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+      padding: 18px 18px 14px; margin-bottom: 20px;
+    }
+    .card h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+    .card .subtitle { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 14px; }
+
+    .bar-row { display: grid; grid-template-columns: 150px 1fr 90px; align-items: center; gap: 10px; padding: 7px 0; }
+    .bar-row .g-label { font-size: 0.8rem; color: var(--text-secondary); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { position: relative; height: 18px; border-left: 1px solid var(--baseline); }
+    .bar {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: var(--series-1); border-radius: 0 4px 4px 0;
+      min-width: 2px; transition: width 0.4s ease; cursor: default;
+    }
+    .bar-row:hover .bar { filter: brightness(1.12); }
+    .bar-val { font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+    .bar-val .r { color: var(--muted); font-size: 0.72rem; }
+
+    #tooltip {
+      position: fixed; pointer-events: none; z-index: 10; display: none;
+      background: var(--text-primary); color: var(--page);
+      font-size: 0.75rem; padding: 6px 10px; border-radius: 8px; max-width: 240px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); }
+    th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
+    td.num { font-variant-numeric: tabular-nums; text-align: right; }
+    th.num { text-align: right; }
+    td.time { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
+    .attend-yes::before { content: "●"; color: var(--series-1); margin-right: 6px; font-size: 0.7em; vertical-align: 1px; }
+    .attend-no { color: var(--muted); }
+    .attend-no::before { content: "○"; margin-right: 6px; font-size: 0.7em; vertical-align: 1px; }
+
+    .empty, .error { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 0.9rem; }
+    .error { color: #d03b3b; }
+    .table-scroll { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>RSVP Dashboard <small id="subtitle">Nuqman &amp; Alya · Walimatul Urus</small></h1>
+      <div class="refresh-row">
+        <span id="last-updated"></span>
+        <button class="refresh" id="refresh-btn">Refresh</button>
+      </div>
+    </header>
+
+    <div class="tiles" id="tiles"></div>
+
+    <div class="card">
+      <h2>Attending guests by invitation group</h2>
+      <p class="subtitle">Total pax from RSVPs marked "attending", per share link</p>
+      <div id="group-chart"></div>
+    </div>
+
+    <div class="card">
+      <h2>All RSVPs</h2>
+      <p class="subtitle" id="rsvp-count"></p>
+      <div class="table-scroll">
+        <table id="rsvp-table" hidden>
+          <thead>
+            <tr><th>Name</th><th>Group</th><th>Attending</th><th class="num">Pax</th><th>When</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="empty" id="table-empty" hidden>No RSVPs yet.</p>
+    </div>
+
+    <p class="error" id="error" hidden></p>
+  </div>
+  <div id="tooltip"></div>
+
+  <script src="js/config.js"></script>
+  <script>
+    const C = WEDDING_CONFIG;
+    const groupLabel = (g) => (g && C.groups[g]) || (g ? g : "Direct link (no group)");
+
+    const fmtTime = (iso) => {
+      const d = new Date(iso);
+      return isNaN(d) ? "" : d.toLocaleString("en-GB", {
+        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+      });
+    };
+
+    function tile(label, value, sub) {
+      return `<div class="tile"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub || ""}</div></div>`;
+    }
+
+    function render(rsvps, wishesCount) {
+      const attending = rsvps.filter((r) => r.attending === "Yes");
+      const declined = rsvps.filter((r) => r.attending !== "Yes");
+      const totalPax = attending.reduce((s, r) => s + r.pax, 0);
+
+      document.getElementById("tiles").innerHTML =
+        tile("Attending", totalPax + " pax", attending.length + " responses") +
+        tile("Total responses", rsvps.length, "") +
+        tile("Declined", declined.length, "responses") +
+        tile("Wishes", wishesCount, "ucapan received");
+
+      // --- per-group aggregation ---
+      const keys = Object.keys(C.groups).concat([""]);
+      const byGroup = keys.map((g) => {
+        const rows = rsvps.filter((r) => (r.group || "") === g);
+        const att = rows.filter((r) => r.attending === "Yes");
+        return {
+          g,
+          label: groupLabel(g),
+          pax: att.reduce((s, r) => s + r.pax, 0),
+          responses: rows.length,
+          declined: rows.length - att.length,
+        };
+      }).filter((x) => x.g !== "" || x.responses > 0); // hide "direct" row if unused
+
+      byGroup.sort((a, b) => b.pax - a.pax);
+      const max = Math.max(1, ...byGroup.map((x) => x.pax));
+
+      const chart = document.getElementById("group-chart");
+      chart.innerHTML = "";
+      byGroup.forEach((x) => {
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML =
+          `<span class="g-label">${x.label}</span>` +
+          `<div class="bar-track"><div class="bar" style="width:${(x.pax / max) * 100}%"></div></div>` +
+          `<span class="bar-val">${x.pax} pax <span class="r">· ${x.responses} resp</span></span>`;
+        row.addEventListener("mousemove", (e) => showTip(e, `${x.label} — ${x.pax} pax attending · ${x.responses} responses · ${x.declined} declined`));
+        row.addEventListener("mouseleave", hideTip);
+        chart.appendChild(row);
+      });
+      if (!byGroup.length) chart.innerHTML = '<p class="empty">No RSVPs yet.</p>';
+
+      // --- table ---
+      const table = document.getElementById("rsvp-table");
+      const tbody = table.querySelector("tbody");
+      tbody.innerHTML = "";
+      document.getElementById("table-empty").hidden = rsvps.length > 0;
+      table.hidden = rsvps.length === 0;
+      document.getElementById("rsvp-count").textContent =
+        rsvps.length ? `${rsvps.length} responses · newest first` : "";
+      rsvps.forEach((r) => {
+        const tr = document.createElement("tr");
+        const yes = r.attending === "Yes";
+        const cells = [
+          r.name,
+          groupLabel(r.group),
+          yes ? "Yes" : "No",
+          yes ? r.pax : "—",
+          fmtTime(r.timestamp),
+        ];
+        cells.forEach((val, i) => {
+          const td = document.createElement("td");
+          td.textContent = val;
+          if (i === 2) td.className = yes ? "attend-yes" : "attend-no";
+          if (i === 3) td.className = "num";
+          if (i === 4) td.className = "time";
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    const tip = document.getElementById("tooltip");
+    function showTip(e, text) {
+      tip.textContent = text;
+      tip.style.display = "block";
+      const pad = 12;
+      let x = e.clientX + pad, y = e.clientY + pad;
+      const r = tip.getBoundingClientRect();
+      if (x + r.width > innerWidth - 8) x = e.clientX - r.width - pad;
+      if (y + r.height > innerHeight - 8) y = e.clientY - r.height - pad;
+      tip.style.left = x + "px";
+      tip.style.top = y + "px";
+    }
+    function hideTip() { tip.style.display = "none"; }
+
+    async function load() {
+      const err = document.getElementById("error");
+      err.hidden = true;
+      if (!C.appsScriptUrl) {
+        err.hidden = false;
+        err.textContent = "No Apps Script URL configured in js/config.js — dashboard has no data source.";
+        return;
+      }
+      try {
+        const [rsvpRes, wishRes] = await Promise.all([
+          fetch(C.appsScriptUrl + "?type=rsvps").then((r) => r.json()),
+          fetch(C.appsScriptUrl + "?type=wishes").then((r) => r.json()),
+        ]);
+        if (!rsvpRes.rsvps) {
+          err.hidden = false;
+          err.textContent = "The backend doesn't support ?type=rsvps yet — update Code.gs in Apps Script and deploy a New Version.";
+          return;
+        }
+        render(rsvpRes.rsvps, (wishRes.wishes || []).length);
+        document.getElementById("last-updated").textContent =
+          "Updated " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      } catch (e) {
+        err.hidden = false;
+        err.textContent = "Could not load data: " + e.message;
+      }
+    }
+
+    document.getElementById("refresh-btn").addEventListener("click", load);
+    setInterval(load, 60000);
+    load();
+  </script>
+</body>
+</html>

@@ -49,4 +49,16 @@ const WEDDING_CONFIG = {
 
   // Max pax a guest can bring (dropdown in RSVP form)
   maxPax: 15,
+
+  // --- Invitation groups ----------------------------------------
+  // Share group-specific links so RSVPs are tagged by who invited
+  // the guest, e.g. https://<your-site>/gi for the groom's guests.
+  // The key is the URL path; the label appears in the dashboard.
+  groups: {
+    gi: "Nuqman (Groom)",
+    br: "Alya (Bride)",
+    zj: "Zainal 'Abidin (Father)",
+    mm: "Morly (Mother)",
+    sb: "Siblings",
+  },
 };
