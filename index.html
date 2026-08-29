@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Walimatul Urus · Nuqman &amp; Aisyah</title>
+  <meta name="description" content="Jemputan Walimatul Urus / Wedding Invitation" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ====================== COVER / ENVELOPE ====================== -->
+  <div id="cover" class="cover">
+    <div class="cover-inner">
+      <div class="floral floral-top" aria-hidden="true"></div>
+      <p class="cover-eyebrow" data-i18n="coverEyebrow">Walimatul Urus</p>
+      <h1 class="cover-names">
+        <span id="cover-groom">Nuqman</span>
+        <span class="amp">&amp;</span>
+        <span id="cover-bride">Aisyah</span>
+      </h1>
+      <p class="cover-date" id="cover-date"></p>
+      <button id="open-btn" class="btn btn-gold">
+        <span data-i18n="openBtn">Buka Jemputan</span>
+      </button>
+      <div class="floral floral-bottom" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- ====================== MAIN CARD ====================== -->
+  <main id="card" class="card" hidden>
+
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button id="lang-bm" class="lang-btn active">BM</button>
+      <button id="lang-en" class="lang-btn">EN</button>
+    </div>
+
+    <!-- Hero -->
+    <section class="section hero">
+      <div class="floral floral-top" aria-hidden="true"></div>
+      <p class="bismillah">﷽</p>
+      <p class="muted" data-i18n="withJoy">Dengan penuh kesyukuran, kami</p>
+      <p class="host-line" id="host-line1"></p>
+      <p class="host-line" id="host-line2"></p>
+      <p class="muted" data-i18n="inviteText">menjemput Dato' / Datin / Tuan / Puan / Encik / Cik ke majlis perkahwinan anakanda kami</p>
+      <h2 class="full-names">
+        <span id="groom-full"></span>
+        <span class="amp script">&amp;</span>
+        <span id="bride-full"></span>
+      </h2>
+    </section>
+
+    <!-- Event details -->
+    <section class="section details">
+      <h3 class="section-title" data-i18n="detailsTitle">Butiran Majlis</h3>
+      <div class="detail-item">
+        <p class="detail-label" data-i18n="dateLabel">Tarikh</p>
+        <p class="detail-value" id="event-date"></p>
+      </div>
+      <div class="detail-item">
+        <p class="detail-label" data-i18n="timeLabel">Masa</p>
+        <p class="detail-value" id="event-time"></p>
+      </div>
+      <div class="detail-item">
+        <p class="detail-label" data-i18n="venueLabel">Tempat</p>
+        <p class="detail-value" id="venue-name"></p>
+        <p class="muted small" id="venue-address"></p>
+      </div>
+      <div class="btn-row">
+        <a id="maps-btn" class="btn btn-outline" target="_blank" rel="noopener">Google Maps</a>
+        <a id="waze-btn" class="btn btn-outline" target="_blank" rel="noopener">Waze</a>
+        <a id="calendar-btn" class="btn btn-outline" target="_blank" rel="noopener" data-i18n="calendarBtn">Simpan Tarikh</a>
+      </div>
+    </section>
+
+    <!-- Countdown -->
+    <section class="section countdown-section">
+      <h3 class="section-title" data-i18n="countdownTitle">Menghitung Hari</h3>
+      <div class="countdown" id="countdown">
+        <div class="cd-box"><span id="cd-days">0</span><small data-i18n="cdDays">Hari</small></div>
+        <div class="cd-box"><span id="cd-hours">0</span><small data-i18n="cdHours">Jam</small></div>
+        <div class="cd-box"><span id="cd-mins">0</span><small data-i18n="cdMins">Minit</small></div>
+        <div class="cd-box"><span id="cd-secs">0</span><small data-i18n="cdSecs">Saat</small></div>
+      </div>
+      <p id="countdown-done" class="muted" hidden data-i18n="countdownDone">Alhamdulillah, hari yang dinanti telah tiba!</p>
+    </section>
+
+    <!-- Tentative -->
+    <section class="section" id="tentative-section">
+      <h3 class="section-title" data-i18n="tentativeTitle">Aturcara Majlis</h3>
+      <ul class="tentative" id="tentative-list"></ul>
+    </section>
+
+    <!-- RSVP -->
+    <section class="section rsvp">
+      <h3 class="section-title">RSVP</h3>
+      <p class="muted" data-i18n="rsvpIntro">Sila sahkan kehadiran anda sebelum tarikh majlis.</p>
+      <form id="rsvp-form">
+        <label>
+          <span data-i18n="rsvpName">Nama</span>
+          <input type="text" name="name" required maxlength="80" />
+        </label>
+        <label>
+          <span data-i18n="rsvpAttend">Kehadiran</span>
+          <select name="attending" required>
+            <option value="yes" data-i18n="rsvpYes">Hadir</option>
+            <option value="no" data-i18n="rsvpNo">Tidak hadir</option>
+          </select>
+        </label>
+        <label id="pax-field">
+          <span data-i18n="rsvpPax">Bilangan tetamu (pax)</span>
+          <select name="pax" id="pax-select"></select>
+        </label>
+        <button type="submit" class="btn btn-gold" data-i18n="rsvpSubmit">Hantar RSVP</button>
+        <p id="rsvp-status" class="form-status" role="status"></p>
+      </form>
+    </section>
+
+    <!-- Wishes -->
+    <section class="section wishes">
+      <h3 class="section-title" data-i18n="wishesTitle">Ucapan &amp; Doa</h3>
+      <form id="wish-form">
+        <label>
+          <span data-i18n="rsvpName">Nama</span>
+          <input type="text" name="name" required maxlength="80" />
+        </label>
+        <label>
+          <span data-i18n="wishMsg">Ucapan</span>
+          <textarea name="message" required maxlength="500" rows="3"></textarea>
+        </label>
+        <button type="submit" class="btn btn-gold" data-i18n="wishSubmit">Hantar Ucapan</button>
+        <p id="wish-status" class="form-status" role="status"></p>
+      </form>
+      <div id="wishes-list" class="wishes-list"></div>
+    </section>
+
+    <!-- Contact -->
+    <section class="section contact">
+      <h3 class="section-title" data-i18n="contactTitle">Hubungi Kami</h3>
+      <div id="contact-list" class="btn-row wrap"></div>
+    </section>
+
+    <footer class="footer">
+      <div class="floral floral-bottom" aria-hidden="true"></div>
+      <p class="script footer-names" id="footer-names"></p>
+      <p class="muted small" data-i18n="footerThanks">Terima kasih atas doa dan kehadiran anda</p>
+    </footer>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
