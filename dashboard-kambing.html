@@ -5,35 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RSVP Dashboard · Nuqman &amp; Alya</title>
   <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --surface-1: #fcfcfb;
-      --page: #f9f9f7;
-      --text-primary: #0b0b0b;
-      --text-secondary: #52514e;
-      --muted: #898781;
-      --grid: #e1e0d9;
-      --baseline: #c3c2b7;
-      --border: rgba(11, 11, 11, 0.10);
-      --series-1: #2a78d6;   /* attending */
-      --decline: #898781;    /* declined = neutral, de-emphasised */
+      --surface-1: #ffffff;
+      --page: #f6f9fd;
+      --text-primary: #2e3a4f;
+      --text-secondary: #55647f;
+      --muted: #74839c;
+      --grid: #e1eaf6;
+      --baseline: #c9d8ec;
+      --border: rgba(47, 77, 143, 0.14);
+      --series-1: #4a6fb5;   /* attending */
+      --royal-deep: #2f4d8f;
+      --gold: #c8a464;
+      --decline: #74839c;    /* declined = neutral, de-emphasised */
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --surface-1: #1a1a19;
-        --page: #0d0d0d;
-        --text-primary: #ffffff;
-        --text-secondary: #c3c2b7;
-        --muted: #898781;
-        --grid: #2c2c2a;
-        --baseline: #383835;
-        --border: rgba(255, 255, 255, 0.10);
-        --series-1: #3987e5;
+        --surface-1: #1a2440;
+        --page: #0f1526;
+        --text-primary: #e8eef8;
+        --text-secondary: #b8c6dd;
+        --muted: #8296b5;
+        --grid: #263352;
+        --baseline: #33436b;
+        --border: rgba(255, 255, 255, 0.12);
+        --series-1: #8fabd9;
+        --royal-deep: #a8c2e8;
       }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-family: "Jost", system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-weight: 300;
       background: var(--page);
       color: var(--text-primary);
       padding: 24px 16px 60px;
@@ -41,15 +48,24 @@
     }
     .wrap { max-width: 760px; margin: 0 auto; }
     header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-    h1 { font-size: 1.25rem; font-weight: 600; }
-    h1 small { display: block; font-size: 0.8rem; font-weight: 400; color: var(--text-secondary); }
+    h1 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.55rem; font-weight: 600; color: var(--royal-deep); }
+    h1 small { display: block; font-family: "Jost", sans-serif; font-size: 0.8rem; font-weight: 400; color: var(--text-secondary); }
     .refresh-row { display: flex; align-items: center; gap: 10px; }
     #last-updated { font-size: 0.75rem; color: var(--muted); }
     button.refresh {
-      font: inherit; font-size: 0.8rem; padding: 6px 14px; border-radius: 8px;
-      border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); cursor: pointer;
+      font: inherit; font-size: 0.8rem; padding: 6px 14px; border-radius: 999px;
+      border: 1px solid var(--series-1); background: var(--surface-1); color: var(--series-1); cursor: pointer;
     }
-    button.refresh:hover { border-color: var(--baseline); }
+    button.refresh:hover { border-color: var(--royal-deep); color: var(--royal-deep); }
+
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .chip {
+      font: inherit; font-size: 0.78rem; letter-spacing: 0.04em; padding: 6px 14px;
+      border-radius: 999px; border: 1px solid var(--series-1);
+      background: var(--surface-1); color: var(--series-1); cursor: pointer;
+    }
+    .chip:hover { border-color: var(--royal-deep); }
+    .chip.active { background: var(--series-1); color: #fff; }
 
     .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .tile {
@@ -63,7 +79,7 @@
       background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
       padding: 18px 18px 14px; margin-bottom: 20px;
     }
-    .card h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+    .card h2 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.15rem; font-weight: 600; color: var(--royal-deep); margin-bottom: 2px; }
     .card .subtitle { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 14px; }
 
     .bar-row { display: grid; grid-template-columns: 150px 1fr 90px; align-items: center; gap: 10px; padding: 7px 0; }
@@ -74,7 +90,9 @@
       background: var(--series-1); border-radius: 0 4px 4px 0;
       min-width: 2px; transition: width 0.4s ease; cursor: default;
     }
+    .bar-row { cursor: pointer; }
     .bar-row:hover .bar { filter: brightness(1.12); }
+    .bar-row.dim { opacity: 0.35; }
     .bar-val { font-size: 0.8rem; font-variant-numeric: tabular-nums; }
     .bar-val .r { color: var(--muted); font-size: 0.72rem; }
 
@@ -108,6 +126,8 @@
         <button class="refresh" id="refresh-btn">Refresh</button>
       </div>
     </header>
+
+    <div class="filters" id="filters"></div>
 
     <div class="tiles" id="tiles"></div>
 
@@ -151,21 +171,54 @@
       return `<div class="tile"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub || ""}</div></div>`;
     }
 
-    function render(rsvps, wishesCount) {
+    let allRsvps = [];
+    let wishesTotal = 0;
+    let activeGroup = "all"; // "all", a group key, or "" for direct link
+
+    function buildFilters() {
+      const wrap = document.getElementById("filters");
+      const hasDirect = allRsvps.some((r) => !(r.group || ""));
+      const opts = [["all", "All"]]
+        .concat(Object.keys(C.groups).map((g) => [g, groupLabel(g)]))
+        .concat(hasDirect ? [["", groupLabel("")]] : []);
+      if (!opts.some(([v]) => v === activeGroup)) activeGroup = "all";
+      wrap.innerHTML = "";
+      opts.forEach(([val, label]) => {
+        const b = document.createElement("button");
+        b.className = "chip" + (activeGroup === val ? " active" : "");
+        b.textContent = label;
+        b.addEventListener("click", () => {
+          activeGroup = activeGroup === val ? "all" : val;
+          renderAll();
+        });
+        wrap.appendChild(b);
+      });
+    }
+
+    function renderAll() {
+      buildFilters();
+      render();
+    }
+
+    function render() {
+      const rsvps = activeGroup === "all"
+        ? allRsvps
+        : allRsvps.filter((r) => (r.group || "") === activeGroup);
       const attending = rsvps.filter((r) => r.attending === "Yes");
       const declined = rsvps.filter((r) => r.attending !== "Yes");
       const totalPax = attending.reduce((s, r) => s + r.pax, 0);
+      const scope = activeGroup === "all" ? "" : groupLabel(activeGroup);
 
       document.getElementById("tiles").innerHTML =
-        tile("Attending", totalPax + " pax", attending.length + " responses") +
-        tile("Total responses", rsvps.length, "") +
-        tile("Declined", declined.length, "responses") +
-        tile("Wishes", wishesCount, "ucapan received");
+        tile("Attending", totalPax + " pax", attending.length + " responses" + (scope ? " · " + scope : "")) +
+        tile("Total responses", rsvps.length, scope) +
+        tile("Declined", declined.length, "responses" + (scope ? " · " + scope : "")) +
+        tile("Wishes", wishesTotal, "ucapan received (all)");
 
-      // --- per-group aggregation ---
+      // --- per-group aggregation (always across all groups) ---
       const keys = Object.keys(C.groups).concat([""]);
       const byGroup = keys.map((g) => {
-        const rows = rsvps.filter((r) => (r.group || "") === g);
+        const rows = allRsvps.filter((r) => (r.group || "") === g);
         const att = rows.filter((r) => r.attending === "Yes");
         return {
           g,
@@ -178,18 +231,24 @@
 
       byGroup.sort((a, b) => b.pax - a.pax);
       const max = Math.max(1, ...byGroup.map((x) => x.pax));
+      const paxTotal = byGroup.reduce((s, x) => s + x.pax, 0);
+      const pct = (x) => (paxTotal ? Math.round((x.pax / paxTotal) * 100) : 0);
 
       const chart = document.getElementById("group-chart");
       chart.innerHTML = "";
       byGroup.forEach((x) => {
         const row = document.createElement("div");
-        row.className = "bar-row";
+        row.className = "bar-row" + (activeGroup !== "all" && x.g !== activeGroup ? " dim" : "");
         row.innerHTML =
           `<span class="g-label">${x.label}</span>` +
           `<div class="bar-track"><div class="bar" style="width:${(x.pax / max) * 100}%"></div></div>` +
-          `<span class="bar-val">${x.pax} pax <span class="r">· ${x.responses} resp</span></span>`;
-        row.addEventListener("mousemove", (e) => showTip(e, `${x.label} — ${x.pax} pax attending · ${x.responses} responses · ${x.declined} declined`));
+          `<span class="bar-val">${x.pax} pax <span class="r">· ${pct(x)}%</span></span>`;
+        row.addEventListener("mousemove", (e) => showTip(e, `${x.label} — ${x.pax} pax attending (${pct(x)}% of total) · ${x.responses} responses · ${x.declined} declined`));
         row.addEventListener("mouseleave", hideTip);
+        row.addEventListener("click", () => {
+          activeGroup = activeGroup === x.g ? "all" : x.g;
+          renderAll();
+        });
         chart.appendChild(row);
       });
       if (!byGroup.length) chart.innerHTML = '<p class="empty">No RSVPs yet.</p>';
@@ -201,7 +260,7 @@
       document.getElementById("table-empty").hidden = rsvps.length > 0;
       table.hidden = rsvps.length === 0;
       document.getElementById("rsvp-count").textContent =
-        rsvps.length ? `${rsvps.length} responses · newest first` : "";
+        rsvps.length ? `${rsvps.length} responses${scope ? " · " + scope : ""} · newest first` : (scope ? "No RSVPs for " + scope + " yet." : "");
       rsvps.forEach((r) => {
         const tr = document.createElement("tr");
         const yes = r.attending === "Yes";
@@ -256,7 +315,9 @@
           err.textContent = "The backend doesn't support ?type=rsvps yet — update Code.gs in Apps Script and deploy a New Version.";
           return;
         }
-        render(rsvpRes.rsvps, (wishRes.wishes || []).length);
+        allRsvps = rsvpRes.rsvps;
+        wishesTotal = (wishRes.wishes || []).length;
+        renderAll();
         document.getElementById("last-updated").textContent =
           "Updated " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       } catch (e) {

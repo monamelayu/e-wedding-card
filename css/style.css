@@ -168,6 +168,26 @@ body.no-scroll { overflow: hidden; }
 .bismillah { font-size: 2rem; color: var(--gold); margin: 8px 0 18px; }
 .host-line { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; margin: 4px 0; }
 .host-amp { font-size: 1.4rem; color: var(--gold); line-height: 1; margin: 2px 0; }
+.couple-portraits {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 26px 0 4px;
+}
+.couple-portraits[hidden] { display: none; }
+.portrait {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top center;
+  background: radial-gradient(circle at 32% 26%, #b6cdf0, #6b8cc9 75%, #5a7cbd);
+  border: 3px solid #fff;
+  box-shadow:
+    0 0 0 1.5px var(--gold),
+    0 6px 18px rgba(74, 111, 181, 0.18);
+}
+
 .full-names {
   font-family: var(--serif);
   font-weight: 500;
@@ -484,7 +504,7 @@ form .btn { width: 100%; margin-top: 6px; }
   position: fixed;
   right: 16px;
   bottom: 16px;
-  z-index: 40;
+  z-index: 55; /* above the cover so it shows on the landing page */
   width: 44px;
   height: 44px;
   border-radius: 50%;

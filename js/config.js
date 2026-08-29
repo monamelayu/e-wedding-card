@@ -9,6 +9,9 @@ const WEDDING_CONFIG = {
   brideName: "Alya",                    // [PLACEHOLDER]
   groomFullName: "Khairunuqman bin Zainal 'Abidin",   // [PLACEHOLDER]
   brideFullName: "Nur Alya Qistina binti Abd Rahim",      // [PLACEHOLDER]
+  // Portrait illustrations shown in the hero ("" to hide)
+  groomImage: "image/groom.png",
+  brideImage: "image/bride.png",
 
   // --- Hosts (parents), shown in the invitation text ------------
   hostLine1: "Zainal 'Abidin bin Mohd Jais", // [PLACEHOLDER] groom's father
@@ -41,7 +44,7 @@ const WEDDING_CONFIG = {
   // --- Contacts (WhatsApp). Number in international format, no "+" ---
   contacts: [
     { name: "Zainal 'Abidin", role: { bm: "Bapa Pengantin Lelaki", en: "Father of the Groom" }, phone: "60123111999" },   // [PLACEHOLDER]
-    { name: "Khairuzaquan", role: { bm: "Adik Pengantin Lelaki", en: "Brother of the Groom" }, phone: "60198765432" }, // [PLACEHOLDER]
+    { name: "Khairuzaquan", role: { bm: "Adik Pengantin Lelaki", en: "Brother of the Groom" }, phone: "601152522121" }, // [PLACEHOLDER]
   ],
 
   // --- Google Sheets backend ------------------------------------
@@ -60,8 +63,8 @@ const WEDDING_CONFIG = {
   groups: {
     gi: "Nuqman (Groom)",
     br: "Alya (Bride)",
-    zj: "Zainal 'Abidin (Father)",
-    mm: "Morly (Mother)",
+    zj: "Zainal 'Abidin (Abah)",
+    mm: "Morly (Mak)",
     sb: "Siblings",
   },
 };

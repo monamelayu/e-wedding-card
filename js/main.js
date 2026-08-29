@@ -15,7 +15,7 @@ const I18N = {
     coverEyebrow: "Walimatul Urus",
     openBtn: "Buka Jemputan",
     withJoy: "Dengan penuh kesyukuran, kami",
-    inviteText: "menjemput Dato' / Datin / Tuan / Puan / Encik / Cik ke majlis perkahwinan anakanda kami",
+    inviteText: "menjemput Tan Sri / Puan Sri / Datuk / Dato' / Datin / Tuan / Puan / Encik / Cik ke majlis perkahwinan anakanda kami",
     detailsTitle: "Butiran Majlis",
     dateLabel: "Tarikh",
     timeLabel: "Masa",
@@ -127,6 +127,11 @@ function fillStatic() {
   h2.textContent = C.hostLine2;
   h2.hidden = !C.hostLine2;
   document.getElementById("host-amp").hidden = !C.hostLine2;
+  if (C.groomImage && C.brideImage) {
+    document.getElementById("groom-img").src = C.groomImage;
+    document.getElementById("bride-img").src = C.brideImage;
+    document.getElementById("couple-portraits").hidden = false;
+  }
   document.getElementById("venue-name").textContent = C.venueName;
   document.getElementById("venue-address").textContent = C.venueAddress;
   document.getElementById("maps-btn").href = C.googleMapsUrl;
@@ -213,10 +218,34 @@ function updateMusicUI() {
 
 music.addEventListener("play", updateMusicUI);
 music.addEventListener("pause", updateMusicUI);
+let musicUserPaused = false;
 musicBtn.addEventListener("click", () => {
-  if (music.paused) music.play().catch(() => {});
-  else music.pause();
+  if (music.paused) {
+    musicUserPaused = false;
+    music.play().catch(() => {});
+  } else {
+    musicUserPaused = true;
+    music.pause();
+  }
 });
+
+// Start on the landing page. Browsers may block autoplay before the
+// first interaction; if so, start at the guest's first tap anywhere.
+function startMusicEarly() {
+  if (!C.musicSrc) return;
+  musicBtn.hidden = false;
+  updateMusicUI();
+  music.play().catch(() => {
+    const start = (e) => {
+      document.removeEventListener("pointerdown", start);
+      document.removeEventListener("keydown", start);
+      if (musicBtn.contains(e.target)) return; // button's own handler decides
+      if (music.paused && !musicUserPaused) music.play().catch(() => {});
+    };
+    document.addEventListener("pointerdown", start);
+    document.addEventListener("keydown", start);
+  });
+}
 
 // ---------------- Cover ----------------
 document.getElementById("open-btn").addEventListener("click", () => {
@@ -224,11 +253,7 @@ document.getElementById("open-btn").addEventListener("click", () => {
   const card = document.getElementById("card");
   card.hidden = false;
   requestAnimationFrame(revealSections);
-  if (C.musicSrc) {
-    musicBtn.hidden = false;
-    updateMusicUI();
-    music.play().catch(() => {}); // if blocked, guest can tap the note button
-  }
+  if (C.musicSrc && music.paused && !musicUserPaused) music.play().catch(() => {});
 });
 
 // Scroll-reveal for sections
@@ -553,3 +578,4 @@ fillStatic();
 applyLang();
 startCountdown();
 loadWishes();
+startMusicEarly();
