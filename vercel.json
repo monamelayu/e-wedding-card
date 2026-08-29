@@ -1,10 +1,10 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/gi", "destination": "/index.html" },
-    { "source": "/br", "destination": "/index.html" },
-    { "source": "/zj", "destination": "/index.html" },
-    { "source": "/mm", "destination": "/index.html" },
-    { "source": "/sb", "destination": "/index.html" }
+    { "source": "/gi", "destination": "/" },
+    { "source": "/br", "destination": "/" },
+    { "source": "/zj", "destination": "/" },
+    { "source": "/mm", "destination": "/" },
+    { "source": "/sb", "destination": "/" }
   ]
 }
