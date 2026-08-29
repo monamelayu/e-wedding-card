@@ -47,6 +47,7 @@
       <p class="bismillah">﷽</p>
       <p class="muted" data-i18n="withJoy">Dengan penuh kesyukuran, kami</p>
       <p class="host-line" id="host-line1"></p>
+      <p class="host-amp script" id="host-amp" aria-hidden="true">&amp;</p>
       <p class="host-line" id="host-line2"></p>
       <p class="muted" data-i18n="inviteText">menjemput Dato' / Datin / Tuan / Puan / Encik / Cik ke majlis perkahwinan anakanda kami</p>
       <h2 class="full-names">
@@ -73,9 +74,18 @@
         <p class="muted small" id="venue-address"></p>
       </div>
       <div class="btn-row">
-        <a id="maps-btn" class="btn btn-outline" target="_blank" rel="noopener">Google Maps</a>
-        <a id="waze-btn" class="btn btn-outline" target="_blank" rel="noopener">Waze</a>
-        <a id="calendar-btn" class="btn btn-outline" target="_blank" rel="noopener" data-i18n="calendarBtn">Simpan Tarikh</a>
+        <a id="maps-btn" class="btn btn-outline" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M12 2C7.8 2 4.5 5.4 4.5 9.5c0 5.6 6.6 11.9 7.5 12.5.9-.6 7.5-6.9 7.5-12.5C19.5 5.4 16.2 2 12 2zm0 10.2a2.85 2.85 0 1 1 0-5.7 2.85 2.85 0 0 1 0 5.7z"/></svg>
+          <span>Google Maps</span>
+        </a>
+        <a id="waze-btn" class="btn btn-outline" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4a8 8 0 0 1 0 16c-1.8 0-3.4-.6-4.8-1.6-1 .5-2.3.7-3.7.5 1.1-.9 1.6-1.9 1.7-3.2A7.97 7.97 0 0 1 12 4z"/><path d="M9.2 13.4a3.4 3.4 0 0 0 5.6 0"/><circle cx="9.6" cy="10" r="0.9" fill="currentColor" stroke="none"/><circle cx="14.4" cy="10" r="0.9" fill="currentColor" stroke="none"/></svg>
+          <span>Waze</span>
+        </a>
+        <a id="calendar-btn" class="btn btn-outline" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 2.8v4M16 2.8v4"/><circle cx="12" cy="15" r="1.2" fill="currentColor" stroke="none"/></svg>
+          <span data-i18n="calendarBtn">Simpan Tarikh</span>
+        </a>
       </div>
     </section>
 
@@ -137,6 +147,11 @@
         <button type="submit" class="btn btn-gold" data-i18n="wishSubmit">Hantar Ucapan</button>
         <p id="wish-status" class="form-status" role="status"></p>
       </form>
+      <div class="wishes-toolbar">
+        <button id="wishes-expand" class="wishes-expand" type="button" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3.5h5.5V9M9 20.5H3.5V15M20.5 3.5L14 10M3.5 20.5L10 14"/></svg>
+        </button>
+      </div>
       <div id="wishes-list" class="wishes-list"></div>
     </section>
 
@@ -152,6 +167,29 @@
       <p class="muted small" data-i18n="footerThanks">Terima kasih atas doa dan kehadiran anda</p>
     </footer>
   </main>
+
+  <!-- ====================== BACKGROUND MUSIC ====================== -->
+  <audio id="bg-music" loop preload="auto"></audio>
+  <button id="music-btn" class="music-btn" type="button" hidden>
+    <svg id="music-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6.5l11-2.5v11.5"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="15.5" r="2.5"/></svg>
+    <svg id="music-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M9 18V6.5l11-2.5v11.5"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="15.5" r="2.5"/><path d="M3.5 3.5l17 17"/></svg>
+  </button>
+
+  <!-- ====================== WISH BUBBLES OVERLAY ====================== -->
+  <div id="wish-overlay" class="wish-overlay" hidden>
+    <div class="wo-top">
+      <button id="wo-toggle" class="wo-btn" type="button"></button>
+      <button id="wo-close" class="wo-btn" type="button">✕</button>
+    </div>
+    <div id="wo-bubbles" class="wo-bubbles" aria-hidden="true"></div>
+    <div id="wo-list" class="wo-list" hidden></div>
+    <div id="wo-detail" class="wo-detail" hidden>
+      <div class="wo-detail-card">
+        <p class="w-name" id="wo-detail-name"></p>
+        <p class="w-msg" id="wo-detail-msg"></p>
+      </div>
+    </div>
+  </div>
 
   <script src="js/config.js"></script>
   <script src="js/main.js"></script>

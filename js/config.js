@@ -11,8 +11,8 @@ const WEDDING_CONFIG = {
   brideFullName: "Nur Alya Qistina binti Abd Rahim",      // [PLACEHOLDER]
 
   // --- Hosts (parents), shown in the invitation text ------------
-  hostLine1: "Zainal 'Abidin bin Mohd Jais & Morly binti Mohammed", // [PLACEHOLDER] groom's parents
-  hostLine2: "",                          // optional second host line
+  hostLine1: "Zainal 'Abidin bin Mohd Jais", // [PLACEHOLDER] groom's father
+  hostLine2: "Morly binti Mohammed",         // [PLACEHOLDER] groom's mother
 
   // --- Event ----------------------------------------------------
   // Date/time in ISO format (local time). Used for countdown + calendar.
@@ -21,11 +21,11 @@ const WEDDING_CONFIG = {
   dateDisplay: { bm: "Sabtu, 03 Oktober 2026", en: "Saturday, 03 October 2026" }, // [PLACEHOLDER]
   timeDisplay: { bm: "11:00 pagi – 4:00 petang", en: "11:00 AM – 4:00 PM" },        // [PLACEHOLDER]
 
-  venueName: "The Renjana by Lanai Asmara",                    // [PLACEHOLDER]
-  venueAddress: " L1-09, Level 1, Shaftsbury Putrajaya, Jalan Alamanda, Presint 1, 62000 Putrajaya, Wilayah Persekutuan Putrajaya", // [PLACEHOLDER]
+  venueName: "Mimosa by Lanai Asmara",
+  venueAddress: "L1-03, Level 1, Shaftsbury Putrajaya, Jalan Alamanda, Presint 1, 62000 Putrajaya, Wilayah Persekutuan Putrajaya",
   // Paste full share links from Google Maps / Waze:
-  googleMapsUrl: "https://maps.google.com/?q=The+Renjana+by+Lanai+Asmara+Shaftsbury+Putrajaya",
-  wazeUrl: "https://waze.com/ul?q=The+Renjana+by+Lanai+Asmara+Putrajaya",
+  googleMapsUrl: "https://maps.google.com/?q=Mimosa+by+Lanai+Asmara+Shaftsbury+Putrajaya",
+  wazeUrl: "https://waze.com/ul?q=Mimosa+by+Lanai+Asmara+Putrajaya",
 
   // --- Tentative programme (leave array empty to hide section) ---
   tentative: [
@@ -35,10 +35,13 @@ const WEDDING_CONFIG = {
     { time: "16:00", label: { bm: "Majlis berakhir", en: "End of ceremony" } },
   ],
 
+  // --- Background music (path to an mp3, "" to disable) ---------
+  musicSrc: "music/where_the_wind_blows_instrumental.mp3",
+
   // --- Contacts (WhatsApp). Number in international format, no "+" ---
   contacts: [
-    { name: "Zainal 'Abidin", role: { bm: "Ayah Pengantin Lelaki", en: "Father of the Groom" }, phone: "60123456789" },   // [PLACEHOLDER]
-    { name: "Zaquan", role: { bm: "Adik Pengantin Lelaki", en: "Brother of the Groom" }, phone: "60198765432" }, // [PLACEHOLDER]
+    { name: "Zainal 'Abidin", role: { bm: "Bapa Pengantin Lelaki", en: "Father of the Groom" }, phone: "60123111999" },   // [PLACEHOLDER]
+    { name: "Khairuzaquan", role: { bm: "Adik Pengantin Lelaki", en: "Brother of the Groom" }, phone: "60198765432" }, // [PLACEHOLDER]
   ],
 
   // --- Google Sheets backend ------------------------------------
@@ -48,7 +51,7 @@ const WEDDING_CONFIG = {
   appsScriptUrl: "https://script.google.com/macros/s/AKfycbzk5IXYMDzwNs8GnAoDz-lj2eFvzGenvnk0LZPWYT27pkoJaqsCP2GBx088MwJ81WUv/exec",
 
   // Max pax a guest can bring (dropdown in RSVP form)
-  maxPax: 15,
+  maxPax: 2,
 
   // --- Invitation groups ----------------------------------------
   // Share group-specific links so RSVPs are tagged by who invited
