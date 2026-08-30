@@ -836,6 +836,8 @@ document.getElementById("lang-bm").addEventListener("click", () => setLang("bm")
 document.getElementById("lang-en").addEventListener("click", () => setLang("en"));
 
 // ---------------- Init ----------------
+// ?shot hides floating UI for clean promo/OG screenshots
+if (new URLSearchParams(location.search).has("shot")) document.body.classList.add("shot");
 fillStatic();
 applyLang();
 startCountdown();
