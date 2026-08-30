@@ -191,13 +191,15 @@ body.no-scroll { overflow: hidden; }
 .full-names {
   font-family: var(--serif);
   font-weight: 500;
-  font-size: 1.6rem;
+  /* scales with viewport so each name always fits on one line */
+  font-size: clamp(1rem, 5vw, 1.6rem);
   color: var(--royal-deep);
   margin-top: 22px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
+.full-names span { white-space: nowrap; }
 .full-names .amp { font-family: var(--script); font-size: 1.8rem; color: var(--gold); }
 
 /* ---------- Details ---------- */
@@ -237,7 +239,13 @@ body.no-scroll { overflow: hidden; }
 }
 
 /* ---------- Tentative ---------- */
-.tentative { list-style: none; max-width: 300px; margin: 0 auto; text-align: left; }
+.tentative { list-style: none; max-width: 340px; margin: 0 auto; text-align: left; }
+.tentative li span:not(.t-time) {
+  /* long labels shrink with the screen instead of wrapping */
+  white-space: nowrap;
+  font-size: clamp(0.78rem, 3.6vw, 1rem);
+  align-self: center;
+}
 .tentative li {
   display: flex;
   gap: 18px;
@@ -302,7 +310,36 @@ form .btn { width: 100%; margin-top: 6px; }
 .wish .w-msg { font-size: 0.92rem; margin-top: 2px; white-space: pre-wrap; }
 
 /* ---------- Wish bubbles overlay ---------- */
-.wishes-toolbar { display: flex; justify-content: flex-end; margin: 20px 0 -14px; }
+.wishes-toolbar { display: flex; justify-content: flex-end; align-items: center; margin: 20px 0 -14px; }
+.expand-hint {
+  position: relative;
+  margin-right: 12px;
+  background: var(--royal);
+  color: #fff;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(74, 111, 181, 0.3);
+  animation: hintBob 2.2s ease-in-out infinite;
+}
+.expand-hint::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  transform: translateY(-50%) rotate(45deg);
+  background: var(--royal);
+}
+@keyframes hintBob {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .expand-hint { animation: none; }
+}
 .wishes-expand {
   width: 38px;
   height: 38px;

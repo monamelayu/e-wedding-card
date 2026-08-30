@@ -27,6 +27,9 @@ const I18N = {
     tentativeTitle: "Aturcara Majlis",
     rsvpIntro: "Sila sahkan kehadiran anda sebelum tarikh majlis.",
     rsvpName: "Nama",
+    rsvpPhone: "No. Telefon (pilihan)",
+    rsvpNote: "Nota (pilihan)",
+    rsvpNotePh: "cth. AirAsia, Maybank, BNM",
     rsvpAttend: "Kehadiran",
     rsvpYes: "Hadir",
     rsvpNo: "Tidak hadir",
@@ -41,6 +44,7 @@ const I18N = {
     wishOk: "Terima kasih atas ucapan anda!",
     noWishes: "Jadilah yang pertama memberi ucapan!",
     expandWishes: "Lihat ucapan terapung",
+    expandHint: "Tekan untuk ucapan terapung ✨",
     viewList: "Senarai",
     viewBubbles: "Buih",
     closeWishes: "Tutup",
@@ -66,6 +70,9 @@ const I18N = {
     tentativeTitle: "Programme",
     rsvpIntro: "Kindly confirm your attendance before the event date.",
     rsvpName: "Name",
+    rsvpPhone: "Phone Number (optional)",
+    rsvpNote: "Note (optional)",
+    rsvpNotePh: "e.g. AirAsia, Maybank, BNM",
     rsvpAttend: "Attendance",
     rsvpYes: "Attending",
     rsvpNo: "Not attending",
@@ -80,6 +87,7 @@ const I18N = {
     wishOk: "Thank you for your kind words!",
     noWishes: "Be the first to leave a wish!",
     expandWishes: "See floating wishes",
+    expandHint: "Tap for floating wishes ✨",
     viewList: "List",
     viewBubbles: "Bubbles",
     closeWishes: "Close",
@@ -98,6 +106,9 @@ function applyLang() {
   document.documentElement.lang = lang === "bm" ? "ms" : "en";
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
+    el.placeholder = t(el.dataset.i18nPh);
   });
   document.getElementById("lang-bm").classList.toggle("active", lang === "bm");
   document.getElementById("lang-en").classList.toggle("active", lang === "en");
@@ -358,8 +369,10 @@ rsvpForm.addEventListener("submit", async (e) => {
     await apiPost({
       type: "rsvp",
       name: fd.get("name").trim(),
+      phone: fd.get("phone").trim(),
       attending,
       pax: attending === "yes" ? Number(fd.get("pax")) : 0,
+      note: fd.get("note").trim(),
       group: GROUP,
     });
     status.className = "form-status ok";
@@ -394,6 +407,7 @@ function renderWishes(wishes) {
   list.innerHTML = "";
   list.classList.toggle("scrollable", wishes.length >= 5);
   document.getElementById("wishes-expand").hidden = !wishes.length;
+  document.getElementById("expand-hint").hidden = !wishes.length || hintDismissed;
   if (!wishes.length) {
     const p = document.createElement("p");
     p.className = "muted";
@@ -441,6 +455,7 @@ document.getElementById("wish-form").addEventListener("submit", async (e) => {
 
 // ---------------- Wish bubbles overlay ----------------
 let allWishes = [];
+let hintDismissed = false;
 const woEl = document.getElementById("wish-overlay");
 const woBubbles = document.getElementById("wo-bubbles");
 const woList = document.getElementById("wo-list");
@@ -526,6 +541,8 @@ function showWishDetail(w) {
 
 function openWishOverlay() {
   if (!allWishes.length) return;
+  hintDismissed = true; // the hint has done its job
+  document.getElementById("expand-hint").hidden = true;
   WO.open = true;
   WO.list = false;
   WO.idx = 0;

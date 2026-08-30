@@ -121,6 +121,10 @@
           <input type="text" name="name" required maxlength="80" />
         </label>
         <label>
+          <span data-i18n="rsvpPhone">No. Telefon (pilihan)</span>
+          <input type="tel" name="phone" maxlength="20" inputmode="tel" />
+        </label>
+        <label>
           <span data-i18n="rsvpAttend">Kehadiran</span>
           <select name="attending" required>
             <option value="yes" data-i18n="rsvpYes">Hadir</option>
@@ -130,6 +134,10 @@
         <label id="pax-field">
           <span data-i18n="rsvpPax">Bilangan tetamu (pax)</span>
           <select name="pax" id="pax-select"></select>
+        </label>
+        <label>
+          <span data-i18n="rsvpNote">Nota (pilihan)</span>
+          <input type="text" name="note" maxlength="120" data-i18n-ph="rsvpNotePh" placeholder="cth. AirAsia, Maybank, BNM" />
         </label>
         <button type="submit" class="btn btn-gold" data-i18n="rsvpSubmit">Hantar RSVP</button>
         <p id="rsvp-status" class="form-status" role="status"></p>
@@ -152,6 +160,7 @@
         <p id="wish-status" class="form-status" role="status"></p>
       </form>
       <div class="wishes-toolbar">
+        <span id="expand-hint" class="expand-hint" data-i18n="expandHint" hidden>Tekan untuk ucapan terapung ✨</span>
         <button id="wishes-expand" class="wishes-expand" type="button" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3.5h5.5V9M9 20.5H3.5V15M20.5 3.5L14 10M3.5 20.5L10 14"/></svg>
         </button>

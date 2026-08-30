@@ -143,7 +143,7 @@
       <div class="table-scroll">
         <table id="rsvp-table" hidden>
           <thead>
-            <tr><th>Name</th><th>Group</th><th>Attending</th><th class="num">Pax</th><th>When</th></tr>
+            <tr><th>Name</th><th>Group</th><th>Attending</th><th class="num">Pax</th><th>Note</th><th>Phone</th><th>When</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -269,6 +269,8 @@
           groupLabel(r.group),
           yes ? "Yes" : "No",
           yes ? r.pax : "—",
+          r.note || "—",
+          r.phone || "—",
           fmtTime(r.timestamp),
         ];
         cells.forEach((val, i) => {
@@ -276,7 +278,7 @@
           td.textContent = val;
           if (i === 2) td.className = yes ? "attend-yes" : "attend-no";
           if (i === 3) td.className = "num";
-          if (i === 4) td.className = "time";
+          if (i === 6) td.className = "time";
           tr.appendChild(td);
         });
         tbody.appendChild(tr);

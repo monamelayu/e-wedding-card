@@ -10,8 +10,8 @@ const WEDDING_CONFIG = {
   groomFullName: "Khairunuqman bin Zainal 'Abidin",   // [PLACEHOLDER]
   brideFullName: "Nur Alya Qistina binti Abd Rahim",      // [PLACEHOLDER]
   // Portrait illustrations shown in the hero ("" to hide)
-  groomImage: "image/groom.png",
-  brideImage: "image/bride.png",
+  groomImage: "",
+  brideImage: "",
 
   // --- Hosts (parents), shown in the invitation text ------------
   hostLine1: "Zainal 'Abidin bin Mohd Jais", // [PLACEHOLDER] groom's father
@@ -32,10 +32,10 @@ const WEDDING_CONFIG = {
 
   // --- Tentative programme (leave array empty to hide section) ---
   tentative: [
-    { time: "11:00", label: { bm: "Ketibaan tetamu", en: "Arrival of guests" } },
-    { time: "12:30", label: { bm: "Ketibaan pengantin", en: "Arrival of the couple" } },
-    { time: "13:00", label: { bm: "Makan beradab", en: "Dining ceremony" } },
-    { time: "16:00", label: { bm: "Majlis berakhir", en: "End of ceremony" } },
+    { time: "11:00", label: { bm: "Ketibaan Tetamu", en: "Arrival of Guests" } },
+    { time: "12:30", label: { bm: "Ketibaan Pengantin", en: "Grand Entrance of the Groom and Bride" } },
+    { time: "13:00", label: { bm: "Makan Beradab", en: "Dining Ceremony" } },
+    { time: "16:00", label: { bm: "Majlis Berakhir", en: "End of Ceremony" } },
   ],
 
   // --- Background music (path to an mp3, "" to disable) ---------

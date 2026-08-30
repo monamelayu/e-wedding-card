@@ -9,7 +9,7 @@
  *   > Version: New version > Deploy  (keeps the same URL).
  *
  * Tabs (created/updated automatically):
- *   RSVP:   Timestamp | Name | Attending | Pax | Group
+ *   RSVP:   Timestamp | Name | Attending | Pax | Group | Phone | Note
  *   Wishes: Timestamp | Name | Message
  */
 
@@ -51,7 +51,7 @@ function doGet(e) {
   }
 
   if (e.parameter.type === "rsvps") {
-    const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group"]);
+    const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group", "Phone", "Note"]);
     const rows = sheet.getDataRange().getValues().slice(1);
     const rsvps = rows
       .map(function (r) {
@@ -61,6 +61,8 @@ function doGet(e) {
           attending: String(r[2]),
           pax: Number(r[3]) || 0,
           group: String(r[4] || ""),
+          phone: String(r[5] || ""),
+          note: String(r[6] || ""),
         };
       })
       .reverse();
@@ -78,13 +80,15 @@ function doPost(e) {
     if (!name) return json({ ok: false, error: "Name is required" });
 
     if (data.type === "rsvp") {
-      const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group"]);
+      const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group", "Phone", "Note"]);
       sheet.appendRow([
         new Date(),
         name,
         data.attending === "yes" ? "Yes" : "No",
         Number(data.pax) || 0,
         String(data.group || "").slice(0, 20),
+        String(data.phone || "").trim().slice(0, 20),
+        String(data.note || "").trim().slice(0, 120),
       ]);
       return json({ ok: true });
     }
