@@ -38,6 +38,9 @@ const WEDDING_CONFIG = {
     { time: "16:00", label: { bm: "Majlis Berakhir", en: "End of Ceremony" } },
   ],
 
+  // --- Calendar event title (Google/Apple "save the date") ------
+  calendarTitle: "Walimatul Urus: Zainal & Morly - Nuqman & Alya",
+
   // --- Background music (path to an mp3, "" to disable) ---------
   musicSrc: "music/where_the_wind_blows_instrumental.mp3",
 

@@ -20,7 +20,8 @@ const I18N = {
     dateLabel: "Tarikh",
     timeLabel: "Masa",
     venueLabel: "Tempat",
-    calendarBtn: "Simpan Tarikh",
+    calendarBtn: "Google Calendar",
+    appleCalBtn: "Apple Calendar",
     countdownTitle: "Menghitung Hari",
     cdDays: "Hari", cdHours: "Jam", cdMins: "Minit", cdSecs: "Saat",
     countdownDone: "Alhamdulillah, hari yang dinanti telah tiba!",
@@ -63,7 +64,8 @@ const I18N = {
     dateLabel: "Date",
     timeLabel: "Time",
     venueLabel: "Venue",
-    calendarBtn: "Save the Date",
+    calendarBtn: "Google Calendar",
+    appleCalBtn: "Apple Calendar",
     countdownTitle: "Counting Down",
     cdDays: "Days", cdHours: "Hours", cdMins: "Minutes", cdSecs: "Seconds",
     countdownDone: "Alhamdulillah, the awaited day has arrived!",
@@ -152,12 +154,34 @@ function fillStatic() {
 
   // Google Calendar link
   const fmt = (iso) => iso.replace(/[-:]/g, "").replace(/\.\d+/, "");
+  // Title structure: hosts first, then the couple
+  const calTitle = C.calendarTitle ||
+    `Walimatul Urus ${C.hostLine1}${C.hostLine2 ? " & " + C.hostLine2 : ""} · ${C.groomName} & ${C.brideName}`;
   const calUrl = new URL("https://calendar.google.com/calendar/render");
   calUrl.searchParams.set("action", "TEMPLATE");
-  calUrl.searchParams.set("text", `Walimatul Urus ${C.groomName} & ${C.brideName}`);
+  calUrl.searchParams.set("text", calTitle);
   calUrl.searchParams.set("dates", `${fmt(C.eventStartISO)}/${fmt(C.eventEndISO)}`);
   calUrl.searchParams.set("location", `${C.venueName}, ${C.venueAddress}`);
   document.getElementById("calendar-btn").href = calUrl.toString();
+
+  // Apple Calendar (.ics download)
+  const icsEscape = (s) => s.replace(/([,;\\])/g, "\\$1");
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//e-wedding-card//MS",
+    "BEGIN:VEVENT",
+    `UID:${fmt(C.eventStartISO)}-walimatul-urus@${location.hostname || "local"}`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "")}`,
+    `DTSTART:${fmt(C.eventStartISO)}`,
+    `DTEND:${fmt(C.eventEndISO)}`,
+    `SUMMARY:${icsEscape(calTitle)}`,
+    `LOCATION:${icsEscape(`${C.venueName}, ${C.venueAddress}`)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  document.getElementById("ics-btn").href =
+    URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
 
   // Pax dropdown
   const paxSel = document.getElementById("pax-select");

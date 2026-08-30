@@ -123,6 +123,7 @@
       <h1>RSVP Dashboard <small id="subtitle">Nuqman &amp; Alya · Walimatul Urus</small></h1>
       <div class="refresh-row">
         <span id="last-updated"></span>
+        <button class="refresh" id="export-btn">Export Excel</button>
         <button class="refresh" id="refresh-btn">Refresh</button>
       </div>
     </header>
@@ -328,6 +329,37 @@
       }
     }
 
+    function exportExcel() {
+      const rsvps = activeGroup === "all"
+        ? allRsvps
+        : allRsvps.filter((r) => (r.group || "") === activeGroup);
+      const pad = (n) => String(n).padStart(2, "0");
+      const fmtFull = (iso) => {
+        const d = new Date(iso);
+        return isNaN(d) ? "" :
+          `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+      const esc = (v) => {
+        v = String(v == null ? "" : v);
+        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      };
+      const rows = [["Timestamp", "Name", "Group", "Attending", "Pax", "Phone", "Note"]];
+      rsvps.forEach((r) => rows.push([
+        fmtFull(r.timestamp), r.name, groupLabel(r.group), r.attending,
+        r.attending === "Yes" ? r.pax : 0, r.phone || "", r.note || "",
+      ]));
+      //  BOM so Excel reads UTF-8 (names with ' and emoji) correctly
+      const csv = "\uFEFF" + rows.map((r) => r.map(esc).join(",")).join("\r\n");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      const tag = activeGroup === "all" ? "all" : (activeGroup || "direct");
+      const today = new Date();
+      a.download = `rsvp-${tag}-${today.getFullYear()}${pad(today.getMonth() + 1)}${pad(today.getDate())}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    document.getElementById("export-btn").addEventListener("click", exportExcel);
     document.getElementById("refresh-btn").addEventListener("click", load);
     setInterval(load, 60000);
     load();
