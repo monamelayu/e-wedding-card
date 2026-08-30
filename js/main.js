@@ -42,6 +42,7 @@ const I18N = {
     wishesTitle: "Ucapan & Doa",
     wishMsg: "Ucapan",
     wishDrawToggle: "Saya mahu melukis 🎨",
+    doodlePhoto: "📷 Foto",
     doodleUndo: "Undo",
     doodleClear: "Padam",
     wishNeedSomething: "Sila tulis ucapan atau lukis sesuatu.",
@@ -90,6 +91,7 @@ const I18N = {
     wishesTitle: "Wishes & Prayers",
     wishMsg: "Your wish",
     wishDrawToggle: "I want to draw 🎨",
+    doodlePhoto: "📷 Photo",
     doodleUndo: "Undo",
     doodleClear: "Clear",
     wishNeedSomething: "Please write a wish or draw something.",
@@ -433,6 +435,7 @@ dctx.lineJoin = "round";
 let doodleStrokes = [];
 let doodleCurrent = null;
 let doodleColor = "#2f4d8f";
+let doodleBg = null; // line-art canvas made from an uploaded photo
 
 const isDoodle = (s) => typeof s === "string" && s.startsWith("data:image/png;base64,");
 
@@ -446,6 +449,7 @@ function doodlePos(e) {
 
 function redrawDoodle() {
   dctx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+  if (doodleBg) dctx.drawImage(doodleBg, 0, 0);
   doodleStrokes.forEach((s) => {
     dctx.strokeStyle = dctx.fillStyle = s.color;
     dctx.lineWidth = 5;
@@ -489,7 +493,85 @@ document.getElementById("doodle-undo").addEventListener("click", () => {
 });
 document.getElementById("doodle-clear").addEventListener("click", () => {
   doodleStrokes = [];
+  doodleBg = null;
   redrawDoodle();
+});
+
+// "Doodle-fy": turn an uploaded photo into royal-blue line art, entirely
+// in the browser (the photo itself is never uploaded anywhere).
+function doodlefy(img) {
+  const S = doodleCanvas.width;
+  const c = document.createElement("canvas");
+  c.width = c.height = S;
+  const x = c.getContext("2d");
+  const scale = Math.max(S / img.width, S / img.height); // cover-fit
+  x.drawImage(img, (S - img.width * scale) / 2, (S - img.height * scale) / 2,
+    img.width * scale, img.height * scale);
+  const src = x.getImageData(0, 0, S, S).data;
+  const gray = new Float32Array(S * S);
+  for (let i = 0; i < S * S; i++) {
+    gray[i] = 0.299 * src[i * 4] + 0.587 * src[i * 4 + 1] + 0.114 * src[i * 4 + 2];
+  }
+  // 3x3 blur to calm photographic noise before edge detection
+  const blur = new Float32Array(S * S);
+  for (let y = 1; y < S - 1; y++) {
+    for (let xx = 1; xx < S - 1; xx++) {
+      let sum = 0;
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) sum += gray[(y + dy) * S + xx + dx];
+      blur[y * S + xx] = sum / 9;
+    }
+  }
+  // Sobel edge magnitude
+  const mag = new Float32Array(S * S);
+  for (let y = 1; y < S - 1; y++) {
+    for (let xx = 1; xx < S - 1; xx++) {
+      const i = y * S + xx;
+      const gx = -blur[i - S - 1] - 2 * blur[i - 1] - blur[i + S - 1]
+        + blur[i - S + 1] + 2 * blur[i + 1] + blur[i + S + 1];
+      const gy = -blur[i - S - 1] - 2 * blur[i - S] - blur[i - S + 1]
+        + blur[i + S - 1] + 2 * blur[i + S] + blur[i + S + 1];
+      mag[i] = Math.sqrt(gx * gx + gy * gy);
+    }
+  }
+  // Adaptive threshold: keep the strongest ~13% of pixels as lines, so both
+  // soft and contrasty photos give a similar amount of ink
+  const sorted = Array.from(mag).sort((a, b) => a - b);
+  const threshold = Math.max(28, sorted[Math.floor(sorted.length * 0.87)]);
+  const edge = new Uint8Array(S * S);
+  for (let i = 0; i < S * S; i++) edge[i] = mag[i] >= threshold ? 1 : 0;
+  const out = x.createImageData(S, S);
+  for (let y = 1; y < S - 1; y++) {
+    for (let xx = 1; xx < S - 1; xx++) {
+      const i = y * S + xx;
+      // dilate: paint a pixel if it or a direct neighbour is an edge,
+      // which doubles the line thickness for visibility
+      if (edge[i] || edge[i - 1] || edge[i + 1] || edge[i - S] || edge[i + S]) {
+        out.data[i * 4] = 47;      // royal deep #2f4d8f
+        out.data[i * 4 + 1] = 77;
+        out.data[i * 4 + 2] = 143;
+        out.data[i * 4 + 3] = 255;
+      }
+    }
+  }
+  x.clearRect(0, 0, S, S);
+  x.putImageData(out, 0, 0);
+  return c;
+}
+
+document.getElementById("doodle-photo").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    doodleBg = doodlefy(img);
+    redrawDoodle();
+  };
+  img.onerror = () => URL.revokeObjectURL(url);
+  img.src = url;
 });
 
 const doodleEnable = document.getElementById("doodle-enable");
@@ -499,6 +581,7 @@ doodleEnable.addEventListener("change", () => {
 
 function resetDoodle() {
   doodleStrokes = [];
+  doodleBg = null;
   redrawDoodle();
   doodleEnable.checked = false;
   document.getElementById("doodle-pad").classList.add("doodle-disabled");
@@ -506,7 +589,7 @@ function resetDoodle() {
 
 // Export as PNG data URL, downscaling until it fits a Google Sheets cell
 function doodleData() {
-  if (!doodleEnable.checked || !doodleStrokes.length) return "";
+  if (!doodleEnable.checked || (!doodleStrokes.length && !doodleBg)) return "";
   let url = doodleCanvas.toDataURL("image/png");
   let size = doodleCanvas.width;
   while (url.length > 45000 && size > 100) {

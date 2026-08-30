@@ -381,7 +381,9 @@ form .btn { width: 100%; margin-top: 6px; }
   touch-action: none;
   cursor: crosshair;
 }
-.doodle-tools { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.doodle-tools { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.doodle-photo-btn { display: inline-flex; align-items: center; margin-bottom: 0 !important; }
+.doodle-photo-btn span { color: var(--royal); margin: 0 !important; text-transform: none; letter-spacing: 0.02em; font-size: 0.72rem; }
 .doodle-color {
   width: 26px;
   height: 26px;
