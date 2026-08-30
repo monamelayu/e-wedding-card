@@ -10,7 +10,7 @@
  *
  * Tabs (created/updated automatically):
  *   RSVP:   Timestamp | Name | Attending | Pax | Group | Phone | Note
- *   Wishes: Timestamp | Name | Message
+ *   Wishes: Timestamp | Name | Message | Drawing
  */
 
 const RSVP_SHEET = "RSVP";
@@ -39,11 +39,16 @@ function json(obj) {
 // GET ?type=rsvps  -> all RSVP rows (for the dashboard)
 function doGet(e) {
   if (e.parameter.type === "wishes") {
-    const sheet = getSheet(WISHES_SHEET, ["Timestamp", "Name", "Message"]);
+    const sheet = getSheet(WISHES_SHEET, ["Timestamp", "Name", "Message", "Drawing"]);
     const rows = sheet.getDataRange().getValues().slice(1); // skip header
     const wishes = rows
       .map(function (r) {
-        return { timestamp: r[0], name: String(r[1]), message: String(r[2]) };
+        return {
+          timestamp: r[0],
+          name: String(r[1]),
+          message: String(r[2] || ""),
+          drawing: String(r[3] || ""),
+        };
       })
       .reverse()
       .slice(0, 100);
@@ -97,9 +102,14 @@ function doPost(e) {
 
     if (data.type === "wish") {
       const message = String(data.message || "").trim().slice(0, 500);
-      if (!message) return json({ ok: false, error: "Message is required" });
-      const sheet = getSheet(WISHES_SHEET, ["Timestamp", "Name", "Message"]);
-      sheet.appendRow([new Date(), name, message]);
+      let drawing = String(data.drawing || "");
+      // only accept small PNG data URLs (fits a Sheets cell)
+      if (drawing.indexOf("data:image/png;base64,") !== 0 || drawing.length > 49000) {
+        drawing = "";
+      }
+      if (!message && !drawing) return json({ ok: false, error: "Message or drawing is required" });
+      const sheet = getSheet(WISHES_SHEET, ["Timestamp", "Name", "Message", "Drawing"]);
+      sheet.appendRow([new Date(), name, message, drawing]);
       return json({ ok: true });
     }
 

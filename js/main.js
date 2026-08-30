@@ -41,6 +41,10 @@ const I18N = {
     rsvpErr: "Maaf, berlaku ralat. Sila cuba lagi.",
     wishesTitle: "Ucapan & Doa",
     wishMsg: "Ucapan",
+    wishDraw: "Lukisan (pilihan)",
+    doodleUndo: "Undo",
+    doodleClear: "Padam",
+    wishNeedSomething: "Sila tulis ucapan atau lukis sesuatu.",
     wishSubmit: "Hantar Ucapan",
     wishOk: "Terima kasih atas ucapan anda!",
     noWishes: "Jadilah yang pertama memberi ucapan!",
@@ -85,6 +89,10 @@ const I18N = {
     rsvpErr: "Sorry, something went wrong. Please try again.",
     wishesTitle: "Wishes & Prayers",
     wishMsg: "Your wish",
+    wishDraw: "Drawing (optional)",
+    doodleUndo: "Undo",
+    doodleClear: "Clear",
+    wishNeedSomething: "Please write a wish or draw something.",
     wishSubmit: "Send Wish",
     wishOk: "Thank you for your kind words!",
     noWishes: "Be the first to leave a wish!",
@@ -348,9 +356,29 @@ const SAMPLE_WISHES = [
   { name: "Keluarga Abd Rahim", message: "Selamat menempuh hidup baru. Doa kami sentiasa bersama kalian." },
 ];
 
+// Generated heart doodle so ?sample previews the drawing feature too
+function sampleDoodle() {
+  const c = document.createElement("canvas");
+  c.width = c.height = 300;
+  const x = c.getContext("2d");
+  x.lineWidth = 9;
+  x.lineCap = "round";
+  x.strokeStyle = "#4a6fb5";
+  x.beginPath();
+  x.moveTo(150, 235);
+  x.bezierCurveTo(45, 150, 75, 65, 150, 115);
+  x.bezierCurveTo(225, 65, 255, 150, 150, 235);
+  x.stroke();
+  x.fillStyle = "#c8a464";
+  x.font = "600 34px Georgia, serif";
+  x.textAlign = "center";
+  x.fillText("N + A", 150, 168);
+  return c.toDataURL("image/png");
+}
+
 async function apiGetWishes() {
   if (new URLSearchParams(location.search).has("sample")) {
-    return SAMPLE_WISHES;
+    return [{ name: "Pelukis Misteri", message: "", drawing: sampleDoodle() }].concat(SAMPLE_WISHES);
   }
   if (DEMO) {
     return JSON.parse(localStorage.getItem("demo-wish") || "[]");
@@ -397,6 +425,88 @@ rsvpForm.addEventListener("submit", async (e) => {
   }
 });
 
+// ---------------- Doodle pad ----------------
+const doodleCanvas = document.getElementById("doodle-canvas");
+const dctx = doodleCanvas.getContext("2d");
+dctx.lineCap = "round";
+dctx.lineJoin = "round";
+let doodleStrokes = [];
+let doodleCurrent = null;
+let doodleColor = "#2f4d8f";
+
+const isDoodle = (s) => typeof s === "string" && s.startsWith("data:image/png;base64,");
+
+function doodlePos(e) {
+  const r = doodleCanvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) * (doodleCanvas.width / r.width),
+    y: (e.clientY - r.top) * (doodleCanvas.height / r.height),
+  };
+}
+
+function redrawDoodle() {
+  dctx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+  doodleStrokes.forEach((s) => {
+    dctx.strokeStyle = dctx.fillStyle = s.color;
+    dctx.lineWidth = 5;
+    if (s.pts.length === 1) {
+      dctx.beginPath();
+      dctx.arc(s.pts[0].x, s.pts[0].y, 2.5, 0, Math.PI * 2);
+      dctx.fill();
+      return;
+    }
+    dctx.beginPath();
+    s.pts.forEach((p, i) => (i ? dctx.lineTo(p.x, p.y) : dctx.moveTo(p.x, p.y)));
+    dctx.stroke();
+  });
+}
+
+doodleCanvas.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  doodleCanvas.setPointerCapture(e.pointerId);
+  doodleCurrent = { color: doodleColor, pts: [doodlePos(e)] };
+  doodleStrokes.push(doodleCurrent);
+  redrawDoodle();
+});
+doodleCanvas.addEventListener("pointermove", (e) => {
+  if (!doodleCurrent) return;
+  doodleCurrent.pts.push(doodlePos(e));
+  redrawDoodle();
+});
+["pointerup", "pointercancel"].forEach((ev) =>
+  doodleCanvas.addEventListener(ev, () => { doodleCurrent = null; })
+);
+
+document.querySelectorAll(".doodle-color").forEach((b) => {
+  b.addEventListener("click", () => {
+    doodleColor = b.dataset.color;
+    document.querySelectorAll(".doodle-color").forEach((x) => x.classList.toggle("active", x === b));
+  });
+});
+document.getElementById("doodle-undo").addEventListener("click", () => {
+  doodleStrokes.pop();
+  redrawDoodle();
+});
+document.getElementById("doodle-clear").addEventListener("click", () => {
+  doodleStrokes = [];
+  redrawDoodle();
+});
+
+// Export as PNG data URL, downscaling until it fits a Google Sheets cell
+function doodleData() {
+  if (!doodleStrokes.length) return "";
+  let url = doodleCanvas.toDataURL("image/png");
+  let size = doodleCanvas.width;
+  while (url.length > 45000 && size > 100) {
+    size -= 75;
+    const c = document.createElement("canvas");
+    c.width = c.height = size;
+    c.getContext("2d").drawImage(doodleCanvas, 0, 0, size, size);
+    url = c.toDataURL("image/png");
+  }
+  return url.length <= 45000 ? url : "";
+}
+
 // ---------------- Wishes ----------------
 function makeWishCard(w) {
   const div = document.createElement("div");
@@ -404,10 +514,20 @@ function makeWishCard(w) {
   const name = document.createElement("p");
   name.className = "w-name";
   name.textContent = w.name;
-  const msg = document.createElement("p");
-  msg.className = "w-msg";
-  msg.textContent = w.message;
-  div.append(name, msg);
+  div.appendChild(name);
+  if (w.message) {
+    const msg = document.createElement("p");
+    msg.className = "w-msg";
+    msg.textContent = w.message;
+    div.appendChild(msg);
+  }
+  if (isDoodle(w.drawing)) {
+    const img = document.createElement("img");
+    img.className = "w-doodle";
+    img.src = w.drawing;
+    img.alt = "";
+    div.appendChild(img);
+  }
   return div;
 }
 
@@ -440,8 +560,15 @@ document.getElementById("wish-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
   const status = document.getElementById("wish-status");
-  const btn = form.querySelector("button");
+  const btn = form.querySelector('button[type="submit"]');
   const fd = new FormData(form);
+  const message = fd.get("message").trim();
+  const drawing = doodleData();
+  if (!message && !drawing) {
+    status.className = "form-status err";
+    status.textContent = t("wishNeedSomething");
+    return;
+  }
   btn.disabled = true;
   status.className = "form-status";
   status.textContent = t("rsvpSending");
@@ -449,11 +576,14 @@ document.getElementById("wish-form").addEventListener("submit", async (e) => {
     await apiPost({
       type: "wish",
       name: fd.get("name").trim(),
-      message: fd.get("message").trim(),
+      message,
+      drawing,
     });
     status.className = "form-status ok";
     status.textContent = t("wishOk") + (DEMO ? " " + t("demoNote") : "");
     form.reset();
+    doodleStrokes = [];
+    redrawDoodle();
     loadWishes();
   } catch {
     status.className = "form-status err";
@@ -499,10 +629,18 @@ function spawnBubble() {
   const name = document.createElement("span");
   name.className = "b-name";
   name.textContent = w.name;
-  const snip = document.createElement("span");
-  snip.className = "b-snippet";
-  snip.textContent = w.message;
-  core.append(name, snip);
+  if (isDoodle(w.drawing)) {
+    const img = document.createElement("img");
+    img.className = "b-doodle";
+    img.src = w.drawing;
+    img.alt = "";
+    core.append(img, name);
+  } else {
+    const snip = document.createElement("span");
+    snip.className = "b-snippet";
+    snip.textContent = w.message;
+    core.append(name, snip);
+  }
   b.appendChild(core);
   b.addEventListener("click", () => showWishDetail(w));
   b.addEventListener("animationend", (e) => {
@@ -545,7 +683,10 @@ function buildOverlayList() {
 
 function showWishDetail(w) {
   document.getElementById("wo-detail-name").textContent = w.name;
-  document.getElementById("wo-detail-msg").textContent = w.message;
+  document.getElementById("wo-detail-msg").textContent = w.message || "";
+  const dImg = document.getElementById("wo-detail-doodle");
+  dImg.hidden = !isDoodle(w.drawing);
+  if (!dImg.hidden) dImg.src = w.drawing;
   woDetail.hidden = false;
 }
 

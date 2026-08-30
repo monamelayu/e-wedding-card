@@ -335,6 +335,73 @@ form .btn { width: 100%; margin-top: 6px; }
 .form-status.ok { color: var(--sky); }
 .form-status.err { color: #b3564a; }
 
+/* ---------- Doodle pad ---------- */
+.doodle-wrap { margin-bottom: 16px; }
+.doodle-title {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.72rem;
+  color: var(--royal);
+  margin-bottom: 6px;
+}
+.doodle-pad {
+  border: 1px solid #c9d8ec;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+}
+#doodle-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    #fdfefe;
+  border: 1px dashed #dde7f4;
+  touch-action: none;
+  cursor: crosshair;
+}
+.doodle-tools { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.doodle-color {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #c9d8ec;
+  cursor: pointer;
+  padding: 0;
+}
+.doodle-color.active { box-shadow: 0 0 0 2px var(--ink); }
+.doodle-spacer { flex: 1; }
+.doodle-tool {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--royal);
+  background: #fff;
+  color: var(--royal);
+  cursor: pointer;
+}
+
+.w-doodle {
+  display: block;
+  max-width: 150px;
+  margin-top: 8px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e1eaf6;
+}
+.b-doodle {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 /* ---------- Wishes ---------- */
 .wishes-list { margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
 .wishes-list.scrollable {

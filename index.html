@@ -171,8 +171,23 @@
         </label>
         <label>
           <span data-i18n="wishMsg">Ucapan</span>
-          <textarea name="message" required maxlength="500" rows="3"></textarea>
+          <textarea name="message" maxlength="500" rows="3"></textarea>
         </label>
+        <div class="doodle-wrap">
+          <span class="doodle-title" data-i18n="wishDraw">Lukisan (pilihan)</span>
+          <div class="doodle-pad">
+            <canvas id="doodle-canvas" width="300" height="300"></canvas>
+            <div class="doodle-tools">
+              <button type="button" class="doodle-color active" data-color="#2f4d8f" style="background:#2f4d8f"></button>
+              <button type="button" class="doodle-color" data-color="#6b8cc9" style="background:#6b8cc9"></button>
+              <button type="button" class="doodle-color" data-color="#c8a464" style="background:#c8a464"></button>
+              <button type="button" class="doodle-color" data-color="#b3564a" style="background:#b3564a"></button>
+              <span class="doodle-spacer"></span>
+              <button type="button" class="doodle-tool" id="doodle-undo" data-i18n="doodleUndo">Undo</button>
+              <button type="button" class="doodle-tool" id="doodle-clear" data-i18n="doodleClear">Padam</button>
+            </div>
+          </div>
+        </div>
         <button type="submit" class="btn btn-gold" data-i18n="wishSubmit">Hantar Ucapan</button>
         <p id="wish-status" class="form-status" role="status"></p>
       </form>
@@ -217,6 +232,7 @@
       <div class="wo-detail-card">
         <p class="w-name" id="wo-detail-name"></p>
         <p class="w-msg" id="wo-detail-msg"></p>
+        <img class="w-doodle" id="wo-detail-doodle" alt="" hidden />
       </div>
     </div>
   </div>
