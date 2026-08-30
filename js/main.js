@@ -41,7 +41,7 @@ const I18N = {
     rsvpErr: "Maaf, berlaku ralat. Sila cuba lagi.",
     wishesTitle: "Ucapan & Doa",
     wishMsg: "Ucapan",
-    wishDraw: "Lukisan (pilihan)",
+    wishDrawToggle: "Saya mahu melukis 🎨",
     doodleUndo: "Undo",
     doodleClear: "Padam",
     wishNeedSomething: "Sila tulis ucapan atau lukis sesuatu.",
@@ -89,7 +89,7 @@ const I18N = {
     rsvpErr: "Sorry, something went wrong. Please try again.",
     wishesTitle: "Wishes & Prayers",
     wishMsg: "Your wish",
-    wishDraw: "Drawing (optional)",
+    wishDrawToggle: "I want to draw 🎨",
     doodleUndo: "Undo",
     doodleClear: "Clear",
     wishNeedSomething: "Please write a wish or draw something.",
@@ -492,9 +492,21 @@ document.getElementById("doodle-clear").addEventListener("click", () => {
   redrawDoodle();
 });
 
+const doodleEnable = document.getElementById("doodle-enable");
+doodleEnable.addEventListener("change", () => {
+  document.getElementById("doodle-pad").classList.toggle("doodle-disabled", !doodleEnable.checked);
+});
+
+function resetDoodle() {
+  doodleStrokes = [];
+  redrawDoodle();
+  doodleEnable.checked = false;
+  document.getElementById("doodle-pad").classList.add("doodle-disabled");
+}
+
 // Export as PNG data URL, downscaling until it fits a Google Sheets cell
 function doodleData() {
-  if (!doodleStrokes.length) return "";
+  if (!doodleEnable.checked || !doodleStrokes.length) return "";
   let url = doodleCanvas.toDataURL("image/png");
   let size = doodleCanvas.width;
   while (url.length > 45000 && size > 100) {
@@ -582,8 +594,7 @@ document.getElementById("wish-form").addEventListener("submit", async (e) => {
     status.className = "form-status ok";
     status.textContent = t("wishOk") + (DEMO ? " " + t("demoNote") : "");
     form.reset();
-    doodleStrokes = [];
-    redrawDoodle();
+    resetDoodle();
     loadWishes();
   } catch {
     status.className = "form-status err";

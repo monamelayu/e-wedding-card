@@ -174,8 +174,11 @@
           <textarea name="message" maxlength="500" rows="3"></textarea>
         </label>
         <div class="doodle-wrap">
-          <span class="doodle-title" data-i18n="wishDraw">Lukisan (pilihan)</span>
-          <div class="doodle-pad">
+          <label class="doodle-toggle">
+            <input type="checkbox" id="doodle-enable" />
+            <span data-i18n="wishDrawToggle">Saya mahu melukis 🎨</span>
+          </label>
+          <div class="doodle-pad doodle-disabled" id="doodle-pad">
             <canvas id="doodle-canvas" width="300" height="300"></canvas>
             <div class="doodle-tools">
               <button type="button" class="doodle-color active" data-color="#2f4d8f" style="background:#2f4d8f"></button>

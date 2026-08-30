@@ -115,6 +115,33 @@
     .empty, .error { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 0.9rem; }
     .error { color: #d03b3b; }
     .table-scroll { overflow-x: auto; }
+
+    .row-del {
+      border: none; background: none; color: var(--muted); cursor: pointer;
+      font-size: 0.9rem; padding: 2px 8px; border-radius: 6px; line-height: 1;
+    }
+    .row-del:hover { color: #b3564a; background: rgba(179, 86, 74, 0.12); }
+
+    .modal {
+      position: fixed; inset: 0; z-index: 20;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(15, 21, 38, 0.5); padding: 20px;
+    }
+    .modal[hidden] { display: none; }
+    .modal-card {
+      background: var(--surface-1); border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px 24px; max-width: 380px; width: 100%;
+      box-shadow: 0 18px 50px rgba(10, 20, 40, 0.35);
+    }
+    .modal-card h3 { font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.2rem; color: var(--royal-deep); margin-bottom: 8px; }
+    .modal-card p { font-size: 0.85rem; color: var(--text-secondary); }
+    .modal-note { margin-top: 8px; font-size: 0.75rem !important; color: var(--muted) !important; }
+    .modal-err { margin-top: 8px; color: #d03b3b !important; font-size: 0.8rem !important; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+    .modal-btn { font: inherit; font-size: 0.8rem; padding: 7px 18px; border-radius: 999px; cursor: pointer; }
+    #modal-cancel { border: 1px solid var(--baseline); background: transparent; color: var(--text-secondary); }
+    #modal-confirm { border: 1px solid #b3564a; background: #b3564a; color: #fff; }
+    #modal-confirm:disabled { opacity: 0.6; cursor: default; }
   </style>
 </head>
 <body>
@@ -144,7 +171,7 @@
       <div class="table-scroll">
         <table id="rsvp-table" hidden>
           <thead>
-            <tr><th>Name</th><th>Group</th><th>Attending</th><th class="num">Pax</th><th>Note</th><th>Phone</th><th>When</th></tr>
+            <tr><th>Name</th><th>Group</th><th>Attending</th><th class="num">Pax</th><th>Note</th><th>Phone</th><th>When</th><th></th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -155,6 +182,19 @@
     <p class="error" id="error" hidden></p>
   </div>
   <div id="tooltip"></div>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-card">
+      <h3>Delete this RSVP?</h3>
+      <p id="modal-text"></p>
+      <p class="modal-note">Soft delete — restore it anytime by clearing the "soft_deleted" cell in the Google Sheet.</p>
+      <p class="modal-err" id="modal-err" hidden></p>
+      <div class="modal-actions">
+        <button class="modal-btn" id="modal-cancel">Cancel</button>
+        <button class="modal-btn" id="modal-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/config.js"></script>
   <script>
@@ -282,6 +322,16 @@
           if (i === 6) td.className = "time";
           tr.appendChild(td);
         });
+        const delTd = document.createElement("td");
+        if (r.row) {
+          const delBtn = document.createElement("button");
+          delBtn.className = "row-del";
+          delBtn.textContent = "✕";
+          delBtn.title = "Soft delete";
+          delBtn.addEventListener("click", () => askDelete(r));
+          delTd.appendChild(delBtn);
+        }
+        tr.appendChild(delTd);
         tbody.appendChild(tr);
       });
     }
@@ -360,6 +410,52 @@
       a.click();
       URL.revokeObjectURL(a.href);
     }
+
+    // ---- soft delete with confirmation modal ----
+    const modal = document.getElementById("modal");
+    const modalErr = document.getElementById("modal-err");
+    const modalConfirm = document.getElementById("modal-confirm");
+    let pendingDelete = null;
+
+    function askDelete(r) {
+      pendingDelete = r;
+      modalErr.hidden = true;
+      modalConfirm.disabled = false;
+      modalConfirm.textContent = "Delete";
+      document.getElementById("modal-text").textContent =
+        `"${r.name}" — ${r.attending === "Yes" ? r.pax + " pax, " : "declined, "}${groupLabel(r.group)}.`;
+      modal.hidden = false;
+    }
+
+    function closeModal() {
+      modal.hidden = true;
+      pendingDelete = null;
+    }
+
+    document.getElementById("modal-cancel").addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
+
+    modalConfirm.addEventListener("click", async () => {
+      if (!pendingDelete) return;
+      modalConfirm.disabled = true;
+      modalConfirm.textContent = "Deleting...";
+      modalErr.hidden = true;
+      try {
+        const res = await fetch(C.appsScriptUrl, {
+          method: "POST",
+          body: JSON.stringify({ type: "deleteRsvp", row: pendingDelete.row, name: pendingDelete.name }),
+        }).then((r) => r.json());
+        if (!res.ok) throw new Error(res.error || "Delete failed");
+        closeModal();
+        load();
+      } catch (err) {
+        modalErr.hidden = false;
+        modalErr.textContent = String(err.message || err);
+        modalConfirm.disabled = false;
+        modalConfirm.textContent = "Delete";
+      }
+    });
 
     document.getElementById("export-btn").addEventListener("click", exportExcel);
     document.getElementById("refresh-btn").addEventListener("click", load);

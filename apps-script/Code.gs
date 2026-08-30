@@ -9,12 +9,16 @@
  *   > Version: New version > Deploy  (keeps the same URL).
  *
  * Tabs (created/updated automatically):
- *   RSVP:   Timestamp | Name | Attending | Pax | Group | Phone | Note
+ *   RSVP:   Timestamp | Name | Attending | Pax | Group | Phone | Note | soft_deleted
  *   Wishes: Timestamp | Name | Message | Drawing
+ *
+ * Soft delete: the dashboard marks a row's soft_deleted cell "yes" and it
+ * disappears from the dashboard. Clear that cell in the Sheet to restore.
  */
 
 const RSVP_SHEET = "RSVP";
 const WISHES_SHEET = "Wishes";
+const RSVP_HEADERS = ["Timestamp", "Name", "Attending", "Pax", "Group", "Phone", "Note", "soft_deleted"];
 
 function getSheet(name, headers) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -56,11 +60,12 @@ function doGet(e) {
   }
 
   if (e.parameter.type === "rsvps") {
-    const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group", "Phone", "Note"]);
+    const sheet = getSheet(RSVP_SHEET, RSVP_HEADERS);
     const rows = sheet.getDataRange().getValues().slice(1);
     const rsvps = rows
-      .map(function (r) {
+      .map(function (r, i) {
         return {
+          row: i + 2, // sheet row number, used for soft delete
           timestamp: r[0],
           name: String(r[1]),
           attending: String(r[2]),
@@ -68,8 +73,10 @@ function doGet(e) {
           group: String(r[4] || ""),
           phone: String(r[5] || ""),
           note: String(r[6] || ""),
+          deleted: String(r[7] || "").toLowerCase() === "yes",
         };
       })
+      .filter(function (x) { return !x.deleted; })
       .reverse();
     return json({ ok: true, rsvps: rsvps });
   }
@@ -84,8 +91,22 @@ function doPost(e) {
     const name = String(data.name || "").trim().slice(0, 80);
     if (!name) return json({ ok: false, error: "Name is required" });
 
+    if (data.type === "deleteRsvp") {
+      const sheet = getSheet(RSVP_SHEET, RSVP_HEADERS);
+      const row = Number(data.row);
+      if (!row || row < 2 || row > sheet.getLastRow()) {
+        return json({ ok: false, error: "Invalid row" });
+      }
+      // Guard against stale dashboards: the name must still match that row
+      if (String(sheet.getRange(row, 2).getValue()) !== name) {
+        return json({ ok: false, error: "Row changed — refresh the dashboard and try again" });
+      }
+      sheet.getRange(row, 8).setValue("yes");
+      return json({ ok: true });
+    }
+
     if (data.type === "rsvp") {
-      const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group", "Phone", "Note"]);
+      const sheet = getSheet(RSVP_SHEET, RSVP_HEADERS);
       const phone = String(data.phone || "").trim().slice(0, 20);
       sheet.appendRow([
         new Date(),

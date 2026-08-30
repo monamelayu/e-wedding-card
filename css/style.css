@@ -337,13 +337,31 @@ form .btn { width: 100%; margin-top: 6px; }
 
 /* ---------- Doodle pad ---------- */
 .doodle-wrap { margin-bottom: 16px; }
-.doodle-title {
-  display: block;
+.doodle-toggle {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 8px !important;
+}
+.doodle-toggle input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--royal);
+  cursor: pointer;
+}
+.doodle-toggle span {
   text-transform: uppercase;
   letter-spacing: 0.15em;
   font-size: 0.72rem;
   color: var(--royal);
-  margin-bottom: 6px;
+  margin-bottom: 0 !important;
+}
+.doodle-pad.doodle-disabled {
+  opacity: 0.45;
+  filter: grayscale(0.7);
+  pointer-events: none;
+  user-select: none;
 }
 .doodle-pad {
   border: 1px solid #c9d8ec;
