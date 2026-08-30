@@ -236,6 +236,17 @@
     let wishesTotal = 0;
     let activeGroup = "all"; // "all", a group key, or "" for direct link
 
+    // Secret key (DASH_KEY script property in Apps Script). Stored only in
+    // this browser; guests without it cannot read the RSVP list.
+    let dashKey = localStorage.getItem("dash-key") || "";
+    function promptDashKey(message) {
+      const k = window.prompt(message || "Enter the dashboard key (DASH_KEY):");
+      if (k === null) return false;
+      dashKey = k.trim();
+      localStorage.setItem("dash-key", dashKey);
+      return true;
+    }
+
     function buildFilters() {
       const wrap = document.getElementById("filters");
       const hasDirect = allRsvps.some((r) => !(r.group || ""));
@@ -378,11 +389,22 @@
         err.textContent = "No Apps Script URL configured in js/config.js — dashboard has no data source.";
         return;
       }
+      if (!dashKey && !promptDashKey()) {
+        err.hidden = false;
+        err.textContent = "Dashboard key required to load RSVPs.";
+        return;
+      }
       try {
         const [rsvpRes, wishRes] = await Promise.all([
-          fetch(C.appsScriptUrl + "?type=rsvps").then((r) => r.json()),
+          fetch(C.appsScriptUrl + "?type=rsvps&key=" + encodeURIComponent(dashKey)).then((r) => r.json()),
           fetch(C.appsScriptUrl + "?type=wishes").then((r) => r.json()),
         ]);
+        if (rsvpRes.error && /unauthorized/i.test(rsvpRes.error)) {
+          if (promptDashKey("Wrong or missing dashboard key. Enter the DASH_KEY value:")) return load();
+          err.hidden = false;
+          err.textContent = "Dashboard key required to load RSVPs.";
+          return;
+        }
         if (!rsvpRes.rsvps) {
           err.hidden = false;
           err.textContent = "The backend doesn't support ?type=rsvps yet — update Code.gs in Apps Script and deploy a New Version.";
@@ -516,6 +538,7 @@
             type: pendingDelete.kind === "wish" ? "deleteWish" : "deleteRsvp",
             row: pendingDelete.item.row,
             name: pendingDelete.item.name,
+            key: dashKey,
           }),
         }).then((r) => r.json());
         if (!res.ok) throw new Error(res.error || "Delete failed");

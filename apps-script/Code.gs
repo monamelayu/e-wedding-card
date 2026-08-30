@@ -17,6 +17,16 @@
  * Clear that cell in the Sheet to restore.
  */
 
+// Guests can never read the RSVP list: it requires a secret key that
+// exists only in this Apps Script project, never in the public website
+// code. Set it once: Project Settings (gear) > Script properties >
+// Add property: Name DASH_KEY, Value = any secret you choose.
+// The dashboard asks for the key on first use and remembers it.
+function dashKeyOk(provided) {
+  const key = PropertiesService.getScriptProperties().getProperty("DASH_KEY") || "";
+  return key !== "" && String(provided || "") === key;
+}
+
 const RSVP_SHEET = "RSVP";
 const WISHES_SHEET = "Wishes";
 const RSVP_HEADERS = ["Timestamp", "Name", "Attending", "Pax", "Group", "Phone", "Note", "soft_deleted"];
@@ -65,6 +75,9 @@ function doGet(e) {
   }
 
   if (e.parameter.type === "rsvps") {
+    if (!dashKeyOk(e.parameter.key)) {
+      return json({ ok: false, error: "Unauthorized (missing or wrong dashboard key)" });
+    }
     const sheet = getSheet(RSVP_SHEET, RSVP_HEADERS);
     const rows = sheet.getDataRange().getValues().slice(1);
     const rsvps = rows
@@ -97,6 +110,9 @@ function doPost(e) {
     if (!name) return json({ ok: false, error: "Name is required" });
 
     if (data.type === "deleteRsvp" || data.type === "deleteWish") {
+      if (!dashKeyOk(data.key)) {
+        return json({ ok: false, error: "Unauthorized (missing or wrong dashboard key)" });
+      }
       const isWish = data.type === "deleteWish";
       const sheet = getSheet(
         isWish ? WISHES_SHEET : RSVP_SHEET,
