@@ -121,6 +121,11 @@
       font-size: 0.9rem; padding: 2px 8px; border-radius: 6px; line-height: 1;
     }
     .row-del:hover { color: #b3564a; background: rgba(179, 86, 74, 0.12); }
+    .wish-thumb {
+      width: 42px; height: 42px; object-fit: contain; display: block;
+      background: #fff; border: 1px solid var(--grid); border-radius: 6px;
+    }
+    td.msg-cell { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .modal {
       position: fixed; inset: 0; z-index: 20;
@@ -179,13 +184,27 @@
       <p class="empty" id="table-empty" hidden>No RSVPs yet.</p>
     </div>
 
+    <div class="card">
+      <h2>Wishes (Ucapan)</h2>
+      <p class="subtitle" id="wish-count"></p>
+      <div class="table-scroll">
+        <table id="wish-table" hidden>
+          <thead>
+            <tr><th>Name</th><th>Message</th><th>Doodle</th><th>When</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="empty" id="wish-empty" hidden>No wishes yet.</p>
+    </div>
+
     <p class="error" id="error" hidden></p>
   </div>
   <div id="tooltip"></div>
 
   <div id="modal" class="modal" hidden>
     <div class="modal-card">
-      <h3>Delete this RSVP?</h3>
+      <h3 id="modal-title">Delete this RSVP?</h3>
       <p id="modal-text"></p>
       <p class="modal-note">Soft delete — restore it anytime by clearing the "soft_deleted" cell in the Google Sheet.</p>
       <p class="modal-err" id="modal-err" hidden></p>
@@ -213,6 +232,7 @@
     }
 
     let allRsvps = [];
+    let allWishes = [];
     let wishesTotal = 0;
     let activeGroup = "all"; // "all", a group key, or "" for direct link
 
@@ -328,7 +348,7 @@
           delBtn.className = "row-del";
           delBtn.textContent = "✕";
           delBtn.title = "Soft delete";
-          delBtn.addEventListener("click", () => askDelete(r));
+          delBtn.addEventListener("click", () => askDelete(r, "rsvp"));
           delTd.appendChild(delBtn);
         }
         tr.appendChild(delTd);
@@ -369,8 +389,10 @@
           return;
         }
         allRsvps = rsvpRes.rsvps;
-        wishesTotal = (wishRes.wishes || []).length;
+        allWishes = wishRes.wishes || [];
+        wishesTotal = allWishes.length;
         renderAll();
+        renderWishTable();
         document.getElementById("last-updated").textContent =
           "Updated " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       } catch (e) {
@@ -411,19 +433,65 @@
       URL.revokeObjectURL(a.href);
     }
 
+    function renderWishTable() {
+      const table = document.getElementById("wish-table");
+      const tbody = table.querySelector("tbody");
+      tbody.innerHTML = "";
+      table.hidden = allWishes.length === 0;
+      document.getElementById("wish-empty").hidden = allWishes.length > 0;
+      document.getElementById("wish-count").textContent =
+        allWishes.length ? `${allWishes.length} wishes · newest first` : "";
+      allWishes.forEach((w) => {
+        const tr = document.createElement("tr");
+        const nameTd = document.createElement("td");
+        nameTd.textContent = w.name;
+        const msgTd = document.createElement("td");
+        msgTd.className = "msg-cell";
+        msgTd.textContent = w.message || "—";
+        msgTd.title = w.message || "";
+        const artTd = document.createElement("td");
+        if (w.drawing && w.drawing.indexOf("data:image/png;base64,") === 0) {
+          const img = document.createElement("img");
+          img.className = "wish-thumb";
+          img.src = w.drawing;
+          img.alt = "";
+          artTd.appendChild(img);
+        } else {
+          artTd.textContent = "—";
+        }
+        const timeTd = document.createElement("td");
+        timeTd.className = "time";
+        timeTd.textContent = fmtTime(w.timestamp);
+        const delTd = document.createElement("td");
+        if (w.row) {
+          const delBtn = document.createElement("button");
+          delBtn.className = "row-del";
+          delBtn.textContent = "✕";
+          delBtn.title = "Soft delete";
+          delBtn.addEventListener("click", () => askDelete(w, "wish"));
+          delTd.appendChild(delBtn);
+        }
+        tr.append(nameTd, msgTd, artTd, timeTd, delTd);
+        tbody.appendChild(tr);
+      });
+    }
+
     // ---- soft delete with confirmation modal ----
     const modal = document.getElementById("modal");
     const modalErr = document.getElementById("modal-err");
     const modalConfirm = document.getElementById("modal-confirm");
     let pendingDelete = null;
 
-    function askDelete(r) {
-      pendingDelete = r;
+    function askDelete(item, kind) {
+      pendingDelete = { item, kind: kind || "rsvp" };
       modalErr.hidden = true;
       modalConfirm.disabled = false;
       modalConfirm.textContent = "Delete";
-      document.getElementById("modal-text").textContent =
-        `"${r.name}" — ${r.attending === "Yes" ? r.pax + " pax, " : "declined, "}${groupLabel(r.group)}.`;
+      document.getElementById("modal-title").textContent =
+        kind === "wish" ? "Delete this wish?" : "Delete this RSVP?";
+      document.getElementById("modal-text").textContent = kind === "wish"
+        ? `"${item.name}" — ${item.message ? item.message.slice(0, 80) : "(drawing only)"}`
+        : `"${item.name}" — ${item.attending === "Yes" ? item.pax + " pax, " : "declined, "}${groupLabel(item.group)}.`;
       modal.hidden = false;
     }
 
@@ -444,7 +512,11 @@
       try {
         const res = await fetch(C.appsScriptUrl, {
           method: "POST",
-          body: JSON.stringify({ type: "deleteRsvp", row: pendingDelete.row, name: pendingDelete.name }),
+          body: JSON.stringify({
+            type: pendingDelete.kind === "wish" ? "deleteWish" : "deleteRsvp",
+            row: pendingDelete.item.row,
+            name: pendingDelete.item.name,
+          }),
         }).then((r) => r.json());
         if (!res.ok) throw new Error(res.error || "Delete failed");
         closeModal();

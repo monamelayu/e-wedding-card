@@ -10,15 +10,17 @@
  *
  * Tabs (created/updated automatically):
  *   RSVP:   Timestamp | Name | Attending | Pax | Group | Phone | Note | soft_deleted
- *   Wishes: Timestamp | Name | Message | Drawing
+ *   Wishes: Timestamp | Name | Message | Drawing | soft_deleted
  *
  * Soft delete: the dashboard marks a row's soft_deleted cell "yes" and it
- * disappears from the dashboard. Clear that cell in the Sheet to restore.
+ * disappears from the dashboard (and, for wishes, from the card too).
+ * Clear that cell in the Sheet to restore.
  */
 
 const RSVP_SHEET = "RSVP";
 const WISHES_SHEET = "Wishes";
 const RSVP_HEADERS = ["Timestamp", "Name", "Attending", "Pax", "Group", "Phone", "Note", "soft_deleted"];
+const WISH_HEADERS = ["Timestamp", "Name", "Message", "Drawing", "soft_deleted"];
 
 function getSheet(name, headers) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -43,17 +45,20 @@ function json(obj) {
 // GET ?type=rsvps  -> all RSVP rows (for the dashboard)
 function doGet(e) {
   if (e.parameter.type === "wishes") {
-    const sheet = getSheet(WISHES_SHEET, ["Timestamp", "Name", "Message", "Drawing"]);
+    const sheet = getSheet(WISHES_SHEET, WISH_HEADERS);
     const rows = sheet.getDataRange().getValues().slice(1); // skip header
     const wishes = rows
-      .map(function (r) {
+      .map(function (r, i) {
         return {
+          row: i + 2, // sheet row number, used for soft delete
           timestamp: r[0],
           name: String(r[1]),
           message: String(r[2] || ""),
           drawing: String(r[3] || ""),
+          deleted: String(r[4] || "").toLowerCase() === "yes",
         };
       })
+      .filter(function (x) { return !x.deleted; })
       .reverse()
       .slice(0, 100);
     return json({ ok: true, wishes: wishes });
@@ -91,8 +96,13 @@ function doPost(e) {
     const name = String(data.name || "").trim().slice(0, 80);
     if (!name) return json({ ok: false, error: "Name is required" });
 
-    if (data.type === "deleteRsvp") {
-      const sheet = getSheet(RSVP_SHEET, RSVP_HEADERS);
+    if (data.type === "deleteRsvp" || data.type === "deleteWish") {
+      const isWish = data.type === "deleteWish";
+      const sheet = getSheet(
+        isWish ? WISHES_SHEET : RSVP_SHEET,
+        isWish ? WISH_HEADERS : RSVP_HEADERS
+      );
+      const col = isWish ? WISH_HEADERS.length : RSVP_HEADERS.length; // soft_deleted column
       const row = Number(data.row);
       if (!row || row < 2 || row > sheet.getLastRow()) {
         return json({ ok: false, error: "Invalid row" });
@@ -101,7 +111,7 @@ function doPost(e) {
       if (String(sheet.getRange(row, 2).getValue()) !== name) {
         return json({ ok: false, error: "Row changed — refresh the dashboard and try again" });
       }
-      sheet.getRange(row, 8).setValue("yes");
+      sheet.getRange(row, col).setValue("yes");
       return json({ ok: true });
     }
 
@@ -129,7 +139,7 @@ function doPost(e) {
         drawing = "";
       }
       if (!message && !drawing) return json({ ok: false, error: "Message or drawing is required" });
-      const sheet = getSheet(WISHES_SHEET, ["Timestamp", "Name", "Message", "Drawing"]);
+      const sheet = getSheet(WISHES_SHEET, WISH_HEADERS);
       sheet.appendRow([new Date(), name, message, drawing]);
       return json({ ok: true });
     }
