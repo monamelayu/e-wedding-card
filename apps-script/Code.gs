@@ -81,13 +81,15 @@ function doPost(e) {
 
     if (data.type === "rsvp") {
       const sheet = getSheet(RSVP_SHEET, ["Timestamp", "Name", "Attending", "Pax", "Group", "Phone", "Note"]);
+      const phone = String(data.phone || "").trim().slice(0, 20);
       sheet.appendRow([
         new Date(),
         name,
         data.attending === "yes" ? "Yes" : "No",
         Number(data.pax) || 0,
         String(data.group || "").slice(0, 20),
-        String(data.phone || "").trim().slice(0, 20),
+        // leading apostrophe keeps the number as text (no dropped 0 / E+11)
+        phone ? "'" + phone : "",
         String(data.note || "").trim().slice(0, 120),
       ]);
       return json({ ok: true });
