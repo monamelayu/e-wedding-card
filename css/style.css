@@ -57,7 +57,53 @@ body {
   padding: 24px;
 }
 .cover.closed { opacity: 0; visibility: hidden; }
-.cover-inner { max-width: 420px; width: 100%; }
+.cover-inner { max-width: 420px; width: 100%; position: relative; z-index: 1; }
+
+/* ---------- Cover corner ornaments, butterflies, stars ---------- */
+.cover-deco { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.deco { position: absolute; background-repeat: no-repeat; background-size: contain; }
+.corner {
+  width: min(40vw, 190px);
+  height: min(40vw, 190px);
+  opacity: 0.85;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%236b8cc9' stroke-width='1.5'%3E%3Cpath d='M8 8 C 50 20, 110 14, 185 55'/%3E%3Cpath d='M8 8 C 20 50, 14 110, 55 185'/%3E%3C/g%3E%3Cg fill='%237f9cc9' opacity='0.75'%3E%3Cellipse cx='60' cy='15' rx='10' ry='4' transform='rotate(-8 60 15)'/%3E%3Cellipse cx='102' cy='15' rx='10' ry='4' transform='rotate(2 102 15)'/%3E%3Cellipse cx='142' cy='27' rx='9' ry='3.5' transform='rotate(18 142 27)'/%3E%3Cellipse cx='15' cy='60' rx='4' ry='10' transform='rotate(8 15 60)'/%3E%3Cellipse cx='15' cy='102' rx='4' ry='10' transform='rotate(-2 15 102)'/%3E%3Cellipse cx='27' cy='142' rx='3.5' ry='9' transform='rotate(-18 27 142)'/%3E%3C/g%3E%3Cg fill='%23a8c2e8'%3E%3Ccircle cx='26' cy='15' r='8.5'/%3E%3Ccircle cx='36.5' cy='22.5' r='8.5'/%3E%3Ccircle cx='32.5' cy='35' r='8.5'/%3E%3Ccircle cx='19.5' cy='35' r='8.5'/%3E%3Ccircle cx='15.5' cy='22.5' r='8.5'/%3E%3C/g%3E%3Ccircle cx='26' cy='26' r='5.5' fill='%23c8a464'/%3E%3Ccircle cx='26' cy='26' r='2' fill='%23f6f9fd'/%3E%3Cg fill='%23cfe0f5'%3E%3Ccircle cx='95' cy='6' r='4.5'/%3E%3Ccircle cx='100' cy='11' r='4.5'/%3E%3Ccircle cx='95' cy='16' r='4.5'/%3E%3Ccircle cx='90' cy='11' r='4.5'/%3E%3C/g%3E%3Ccircle cx='95' cy='11' r='3' fill='%238fabd9'/%3E%3Cg fill='%23cfe0f5'%3E%3Ccircle cx='11' cy='95' r='4.5'/%3E%3Ccircle cx='16' cy='100' r='4.5'/%3E%3Ccircle cx='11' cy='105' r='4.5'/%3E%3Ccircle cx='6' cy='100' r='4.5'/%3E%3C/g%3E%3Ccircle cx='11' cy='100' r='3' fill='%238fabd9'/%3E%3Cg fill='%23a8c2e8'%3E%3Ccircle cx='170' cy='50' r='4'/%3E%3Ccircle cx='50' cy='170' r='4'/%3E%3C/g%3E%3Ccircle cx='170' cy='50' r='1.8' fill='%23c8a464'/%3E%3Ccircle cx='50' cy='170' r='1.8' fill='%23c8a464'/%3E%3Cg fill='%23d3b476'%3E%3Ccircle cx='75' cy='28' r='2.5'/%3E%3Ccircle cx='28' cy='75' r='2.5'/%3E%3Ccircle cx='128' cy='19' r='2'/%3E%3Ccircle cx='19' cy='128' r='2'/%3E%3Ccircle cx='158' cy='38' r='2'/%3E%3Ccircle cx='38' cy='158' r='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+.corner-tl { top: 0; left: 0; }
+.corner-tr { top: 0; right: 0; transform: scaleX(-1); }
+.corner-bl { bottom: 0; left: 0; transform: scaleY(-1); }
+.corner-br { bottom: 0; right: 0; transform: scale(-1, -1); }
+
+.butterfly {
+  width: 34px;
+  height: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%23a8c2e8'%3E%3Cellipse cx='12.5' cy='14' rx='8.5' ry='10.5' transform='rotate(-24 12.5 14)'/%3E%3Cellipse cx='27.5' cy='14' rx='8.5' ry='10.5' transform='rotate(24 27.5 14)'/%3E%3C/g%3E%3Cg fill='%238fabd9'%3E%3Cellipse cx='14' cy='27' rx='6' ry='7.5' transform='rotate(-38 14 27)'/%3E%3Cellipse cx='26' cy='27' rx='6' ry='7.5' transform='rotate(38 26 27)'/%3E%3C/g%3E%3Cg fill='%23cfe0f5'%3E%3Ccircle cx='12' cy='13' r='3'/%3E%3Ccircle cx='28' cy='13' r='3'/%3E%3C/g%3E%3Crect x='18.8' y='11' width='2.4' height='20' rx='1.2' fill='%232f4d8f'/%3E%3Cg fill='none' stroke='%232f4d8f' stroke-width='1' stroke-linecap='round'%3E%3Cpath d='M19 11 C 16 6, 13 4, 10 3'/%3E%3Cpath d='M21 11 C 24 6, 27 4, 30 3'/%3E%3C/g%3E%3C/svg%3E");
+  animation: flutter 7s ease-in-out infinite;
+}
+.b1 { top: 17%; right: 9%; }
+.b2 { bottom: 21%; left: 8%; width: 26px; height: 26px; animation-delay: 1.5s; animation-duration: 8.5s; }
+@keyframes flutter {
+  0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+  50% { transform: translate(7px, -14px) rotate(9deg); }
+}
+
+.star {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 2 C21.5 12 28 18.5 38 20 C28 21.5 21.5 28 20 38 C18.5 28 12 21.5 2 20 C12 18.5 18.5 12 20 2 Z' fill='%23d3b476'/%3E%3C/svg%3E");
+  animation: twinkle 3s ease-in-out infinite;
+}
+.s1 { top: 12%; left: 13%; width: 14px; height: 14px; }
+.s2 { top: 25%; right: 19%; width: 10px; height: 10px; animation-delay: 0.8s; }
+.s3 { bottom: 30%; right: 11%; width: 16px; height: 16px; animation-delay: 1.6s; }
+.s4 { bottom: 13%; left: 23%; width: 11px; height: 11px; animation-delay: 2.2s; }
+.s5 { top: 40%; left: 6%; width: 9px; height: 9px; animation-delay: 2.8s; }
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.1) rotate(20deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .butterfly, .star { animation: none; }
+  .star { opacity: 0.7; }
+}
 .cover-eyebrow {
   font-family: var(--sans);
   text-transform: uppercase;
