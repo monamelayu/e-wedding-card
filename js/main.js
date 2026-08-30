@@ -164,24 +164,10 @@ function fillStatic() {
   calUrl.searchParams.set("location", `${C.venueName}, ${C.venueAddress}`);
   document.getElementById("calendar-btn").href = calUrl.toString();
 
-  // Apple Calendar (.ics download)
-  const icsEscape = (s) => s.replace(/([,;\\])/g, "\\$1");
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//e-wedding-card//MS",
-    "BEGIN:VEVENT",
-    `UID:${fmt(C.eventStartISO)}-walimatul-urus@${location.hostname || "local"}`,
-    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "")}`,
-    `DTSTART:${fmt(C.eventStartISO)}`,
-    `DTEND:${fmt(C.eventEndISO)}`,
-    `SUMMARY:${icsEscape(calTitle)}`,
-    `LOCATION:${icsEscape(`${C.venueName}, ${C.venueAddress}`)}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-  document.getElementById("ics-btn").href =
-    URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+  // Apple Calendar: served as a real .ics file (walimatul-urus.ics in the
+  // repo root) so iPhones open it straight into the Add Event sheet.
+  // NOTE: if the event date/venue/title changes in this config, update
+  // walimatul-urus.ics to match.
 
   // Pax dropdown
   const paxSel = document.getElementById("pax-select");

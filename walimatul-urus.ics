@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//e-wedding-card//MS
+BEGIN:VEVENT
+UID:20261003T110000-walimatul-urus@e-wedding-card-nuq-alya.vercel.app
+DTSTAMP:20260830T120000Z
+DTSTART:20261003T110000
+DTEND:20261003T160000
+SUMMARY:Walimatul Urus: Zainal & Morly - Nuqman & Alya
+LOCATION:Mimosa by Lanai Asmara\, L1-03\, Level 1\, Shaftsbury Putrajaya\, Jalan Alamanda\, Presint 1\, 62000 Putrajaya\, Wilayah Persekutuan Putrajaya
+END:VEVENT
+END:VCALENDAR
