@@ -51,7 +51,7 @@ function json(obj) {
   );
 }
 
-// GET ?type=wishes -> wishes (newest first, max 100)
+// GET ?type=wishes -> wishes (newest first, max 400)
 // GET ?type=rsvps  -> all RSVP rows (for the dashboard)
 function doGet(e) {
   if (e.parameter.type === "wishes") {
@@ -70,7 +70,7 @@ function doGet(e) {
       })
       .filter(function (x) { return !x.deleted; })
       .reverse()
-      .slice(0, 100);
+      .slice(0, 400);
     return json({ ok: true, wishes: wishes });
   }
 
@@ -132,6 +132,12 @@ function doPost(e) {
     }
 
     if (data.type === "rsvp") {
+      // RSVP closes at this moment (Malaysia time); the extra_pax
+      // group link keeps working after the deadline.
+      const RSVP_DEADLINE = new Date("2026-09-17T00:00:00+08:00");
+      if (String(data.group || "") !== "extra_pax" && new Date() >= RSVP_DEADLINE) {
+        return json({ ok: false, error: "RSVP period has ended" });
+      }
       const sheet = getSheet(RSVP_SHEET, RSVP_HEADERS);
       const phone = String(data.phone || "").trim().slice(0, 20);
       sheet.appendRow([

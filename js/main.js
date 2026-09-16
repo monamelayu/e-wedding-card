@@ -39,6 +39,9 @@ const I18N = {
     rsvpSending: "Menghantar...",
     rsvpOk: "Terima kasih! RSVP anda telah diterima.",
     rsvpErr: "Maaf, berlaku ralat. Sila cuba lagi.",
+    rsvpClosedTitle: "Tempoh RSVP Telah Tamat",
+    rsvpClosedMsg: "Maaf, tempoh pengesahan kehadiran telah berakhir. Sila hubungi pengirim jemputan ini untuk sebarang pertanyaan.",
+    rsvpClosedContact: "Hubungi Kami",
     wishesTitle: "Ucapan & Doa",
     wishMsg: "Ucapan",
     wishDrawToggle: "Saya mahu melukis 🎨",
@@ -88,6 +91,9 @@ const I18N = {
     rsvpSending: "Sending...",
     rsvpOk: "Thank you! Your RSVP has been received.",
     rsvpErr: "Sorry, something went wrong. Please try again.",
+    rsvpClosedTitle: "RSVP Period Has Ended",
+    rsvpClosedMsg: "Sorry, the RSVP period has ended. Please contact the person who sent you this invitation for any clarification.",
+    rsvpClosedContact: "Contact Us",
     wishesTitle: "Wishes & Prayers",
     wishMsg: "Your wish",
     wishDrawToggle: "I want to draw 🎨",
@@ -390,6 +396,28 @@ async function apiGetWishes() {
   return data.wishes || [];
 }
 
+// ---------------- RSVP deadline ----------------
+// RSVP closes at rsvpDeadlineISO; the extra_pax link stays open.
+// Preview aid: open index.html?expired to see the closed popup early.
+function rsvpClosed() {
+  if (GROUP === "extra_pax") return false;
+  if (new URLSearchParams(location.search).has("expired")) return true;
+  if (!C.rsvpDeadlineISO) return false;
+  return Date.now() >= new Date(C.rsvpDeadlineISO).getTime();
+}
+
+const noticeModal = document.getElementById("notice-modal");
+document.getElementById("notice-close").addEventListener("click", () => {
+  noticeModal.hidden = true;
+});
+document.getElementById("notice-contact").addEventListener("click", () => {
+  noticeModal.hidden = true;
+  document.querySelector(".contact").scrollIntoView({ behavior: "smooth" });
+});
+noticeModal.addEventListener("click", (e) => {
+  if (e.target === noticeModal) noticeModal.hidden = true;
+});
+
 // ---------------- RSVP form ----------------
 const rsvpForm = document.getElementById("rsvp-form");
 rsvpForm.querySelector('[name="attending"]').addEventListener("change", (e) => {
@@ -398,6 +426,10 @@ rsvpForm.querySelector('[name="attending"]').addEventListener("change", (e) => {
 
 rsvpForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (rsvpClosed()) {
+    noticeModal.hidden = false;
+    return;
+  }
   const status = document.getElementById("rsvp-status");
   const btn = rsvpForm.querySelector("button");
   const fd = new FormData(rsvpForm);

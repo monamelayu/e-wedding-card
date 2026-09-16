@@ -5,6 +5,7 @@
     { "source": "/br", "destination": "/" },
     { "source": "/zj", "destination": "/" },
     { "source": "/mm", "destination": "/" },
-    { "source": "/sb", "destination": "/" }
+    { "source": "/sb", "destination": "/" },
+    { "source": "/extra_pax", "destination": "/" }
   ]
 }

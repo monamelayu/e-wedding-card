@@ -233,6 +233,19 @@
     <svg id="music-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M9 18V6.5l11-2.5v11.5"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="15.5" r="2.5"/><path d="M3.5 3.5l17 17"/></svg>
   </button>
 
+  <!-- ====================== RSVP CLOSED MODAL ====================== -->
+  <div id="notice-modal" class="notice-modal" hidden>
+    <div class="notice-card">
+      <p class="notice-icon" aria-hidden="true">⏳</p>
+      <h3 class="notice-title" data-i18n="rsvpClosedTitle">Tempoh RSVP Telah Tamat</h3>
+      <p class="muted small" data-i18n="rsvpClosedMsg">Maaf, tempoh pengesahan kehadiran telah berakhir. Sila hubungi pengirim jemputan ini untuk sebarang pertanyaan.</p>
+      <div class="btn-row">
+        <button type="button" id="notice-contact" class="btn btn-outline" data-i18n="rsvpClosedContact">Hubungi Kami</button>
+        <button type="button" id="notice-close" class="btn btn-gold" data-i18n="closeWishes">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ====================== WISH BUBBLES OVERLAY ====================== -->
   <div id="wish-overlay" class="wish-overlay" hidden>
     <div class="wo-top">

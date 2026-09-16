@@ -69,5 +69,11 @@ const WEDDING_CONFIG = {
     zj: "Zainal 'Abidin (Abah)",
     mm: "Morly (Mak)",
     sb: "Siblings",
+    extra_pax: "Extra Pax (selepas tutup)",
   },
+
+  // --- RSVP deadline --------------------------------------------
+  // RSVP closes at this moment (Malaysia time). Guests then see an
+  // "RSVP ended" popup. The /extra_pax link keeps working after it.
+  rsvpDeadlineISO: "2026-09-17T00:00:00+08:00",
 };
